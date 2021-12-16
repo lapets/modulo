@@ -4,7 +4,7 @@ modulo
 
 Pure Python library for working with modular arithmetic, congruence classes, and finite fields.
 
-|pypi| |readthedocs|
+|pypi| |readthedocs| |actions| |coveralls|
 
 .. |pypi| image:: https://badge.fury.io/py/modulo.svg
    :target: https://badge.fury.io/py/modulo
@@ -13,6 +13,14 @@ Pure Python library for working with modular arithmetic, congruence classes, and
 .. |readthedocs| image:: https://readthedocs.org/projects/modulo/badge/?version=latest
    :target: https://modulo.readthedocs.io/en/latest/?badge=latest
    :alt: Read the Docs documentation status.
+
+.. |actions| image:: https://github.com/lapets/modulo/workflows/lint-test-cover-docs/badge.svg
+   :target: https://github.com/lapets/modulo/actions/workflows/lint-test-cover-docs.yml
+   :alt: GitHub Actions status.
+
+.. |coveralls| image:: https://coveralls.io/repos/github/lapets/modulo/badge.svg?branch=master
+   :target: https://coveralls.io/github/lapets/modulo?branch=master
+   :alt: Coveralls test coverage summary.
 
 Purpose
 -------
