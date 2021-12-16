@@ -141,7 +141,7 @@ class modulo():
         if self.val is None:
             raise TypeError("Expecting a congruence class or integer.")
         other = self._cc(other)
-        (_, inv, gcd) = egcd(other.val, self.mod)
+        (gcd, inv, _) = egcd(other.val, self.mod)
         if gcd > 1:
             raise ValueError("Congruence class has no inverse.")
         else:
@@ -188,7 +188,7 @@ class modulo():
             raise ValueError("Modulus does not match congruence class modulus.")
 
         if other < 0:
-            (_, inv, gcd) = egcd(self.val, self.mod)
+            (gcd, inv, _) = egcd(self.val, self.mod)
             if gcd > 1:
                 raise ValueError("Congruence class has no inverse.")
             else:
