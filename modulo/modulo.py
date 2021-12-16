@@ -2,6 +2,8 @@
 Pure Python library for working with modular arithmetic,
 congruence classes, and finite fields.
 """
+from __future__ import annotations
+from typing import Union
 import doctest
 from egcd import egcd
 
@@ -10,8 +12,8 @@ class modulo: # pylint: disable=C0103
     Class for representing both finite fields and congruence classes
     (depending on the initialization arguments).
     """
-    def __init__(self, *args):
-        if len(args) not in [1,2]:
+    def __init__(self: modulo, *args):
+        if len(args) not in [1, 2]:
             raise TypeError("Must provide either a modulus or an integer and a modulus.")
 
         self.mod = args[-1]
@@ -25,7 +27,7 @@ class modulo: # pylint: disable=C0103
                 raise ValueError("Element must be an integer.")
             self.val = self.val % self.mod
 
-    def _cc(self, arg):
+    def _cc(self: modulo, arg: Union[modulo, int]) -> modulo:
         """
         Attempt to convert argument to a congruence class. Raise an appropriate
         error if this is not possible.
@@ -42,7 +44,7 @@ class modulo: # pylint: disable=C0103
 
         raise TypeError("Expecting a congruence class or integer.")
 
-    def __add__(self, other):
+    def __add__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
         Modular addition.
 
@@ -53,10 +55,11 @@ class modulo: # pylint: disable=C0103
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class or integer.")
+
         other = self._cc(other)
         return modulo((self.val + other.val) % self.mod, self.mod)
 
-    def __radd__(self, other):
+    def __radd__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
         Modular addition.
 
@@ -67,10 +70,11 @@ class modulo: # pylint: disable=C0103
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class or integer.")
+
         other = self._cc(other)
         return modulo((self.val + other.val) % self.mod, self.mod)
 
-    def __sub__(self, other):
+    def __sub__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
         Modular subtraction.
 
@@ -81,10 +85,11 @@ class modulo: # pylint: disable=C0103
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class or integer.")
+
         other = self._cc(other)
         return modulo((self.val - other.val) % self.mod, self.mod)
 
-    def __rsub__(self, other):
+    def __rsub__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
         Modular subtraction.
 
@@ -93,10 +98,11 @@ class modulo: # pylint: disable=C0103
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class or integer.")
+
         other = self._cc(other)
         return modulo((other.val - self.val) % self.mod, self.mod)
 
-    def __mul__(self, other):
+    def __mul__(self, other: Union[modulo, int]) -> modulo:
         """
         Modular multiplication.
 
@@ -107,10 +113,11 @@ class modulo: # pylint: disable=C0103
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class or integer.")
+
         other = self._cc(other)
         return modulo((self.val * other.val) % self.mod, self.mod)
 
-    def __rmul__(self, other):
+    def __rmul__(self, other: Union[modulo, int]) -> modulo:
         """
         Modular multiplication.
 
@@ -119,10 +126,11 @@ class modulo: # pylint: disable=C0103
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class or integer.")
+
         other = self._cc(other)
         return modulo((self.val * other.val) % self.mod, self.mod)
 
-    def __floordiv__(self, other):
+    def __floordiv__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
         Modular division.
 
@@ -141,7 +149,7 @@ class modulo: # pylint: disable=C0103
 
         return modulo((self.val * inv) % self.mod, self.mod)
 
-    def __pos__(self):
+    def __pos__(self: modulo) -> modulo:
         """
         Identify function on congruence classes.
 
@@ -150,9 +158,10 @@ class modulo: # pylint: disable=C0103
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class.")
+
         return modulo(self.val, self.mod)
 
-    def __neg__(self):
+    def __neg__(self: modulo) -> modulo:
         """
         Identify function on congruence classes.
 
@@ -161,9 +170,10 @@ class modulo: # pylint: disable=C0103
         """
         if self.val is None:
             raise TypeError("Can only negate a congruence class.")
+
         return modulo((0 - self.val) % self.mod, self.mod)
 
-    def __pow__(self, other, mod = None): # pylint: disable=W0621
+    def __pow__(self: modulo, other: int, mod: int = None) -> modulo: # pylint: disable=W0621
         """
         Modular exponentiation.
 
@@ -192,7 +202,7 @@ class modulo: # pylint: disable=C0103
 
         return modulo(pow(self.val, other, self.mod), self.mod)
 
-    def __contains__(self, other):
+    def __contains__(self: modulo, other: Union[modulo, int]) -> bool:
         """
         Membership function for integers, congruence classes, and finite fields.
 
@@ -223,10 +233,10 @@ class modulo: # pylint: disable=C0103
 
         return (other % self.mod) == self.val
 
-    def __repr__(self):
+    def __repr__(self: modulo) -> str:
         return str(self)
 
-    def __str__(self):
+    def __str__(self: modulo) -> str:
         """
         String representation.
 
@@ -236,7 +246,7 @@ class modulo: # pylint: disable=C0103
         ss = ([] if self.val is None else [str(self.val)]) + [str(self.mod)]
         return "modulo(" + ", ".join(ss) + ")"
 
-    def __int__(self):
+    def __int__(self: modulo) -> int:
         """
         Conversion to the canonical integer representative of a congruence class.
 
@@ -248,7 +258,7 @@ class modulo: # pylint: disable=C0103
 
         return self.val
 
-    def __len__(self):
+    def __len__(self: modulo) -> int:
         """
         Number of elements in a set of congruence classes (i.e., a finite field).
 
@@ -257,7 +267,6 @@ class modulo: # pylint: disable=C0103
         """
         if self.val is not None:
             raise TypeError("Cannot compute size of a congruence class.")
-
 
         return self.mod
 
