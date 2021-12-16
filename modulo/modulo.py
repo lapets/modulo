@@ -1,33 +1,27 @@
-"""modulo
-https://github.com/lapets/modulo
-
+"""
 Pure Python library for working with modular arithmetic,
 congruence classes, and finite fields.
-
 """
-
-from egcd import egcd
 import doctest
+from egcd import egcd
 
-
-class modulo():
+class modulo: # pylint: disable=C0103
     """
     Class for representing both finite fields and congruence classes
     (depending on the initialization arguments).
-
     """
     def __init__(self, *args):
         if len(args) not in [1,2]:
             raise TypeError("Must provide either a modulus or an integer and a modulus.")
 
         self.mod = args[-1]
-        if type(self.mod) is not int or self.mod <= 0:
+        if not isinstance(self.mod, int) or self.mod <= 0:
             raise ValueError("Modulus must be a positive integer.")
 
         self.val = None
         if len(args) == 2:
             self.val = args[0]
-            if type(self.val) is not int:
+            if not isinstance(self.val, int):
                 raise ValueError("Element must be an integer.")
             self.val = self.val % self.mod
 
@@ -36,23 +30,22 @@ class modulo():
         Attempt to convert argument to a congruence class. Raise an appropriate
         error if this is not possible.
         """
-        if type(arg) is modulo:
+        if isinstance(arg, modulo):
             if arg.val is not None:
                 if self.mod == arg.mod:
                     return arg
-                else:
-                    raise TypeError("Congruence classes do not have the same modulus.")
-            else:
-                raise TypeError("Expecting a congruence class or integer.")
-        elif type(arg) is int:
-            return modulo(arg, self.mod)
-        else:
+                raise TypeError("Congruence classes do not have the same modulus.")
             raise TypeError("Expecting a congruence class or integer.")
+
+        if isinstance(arg, int):
+            return modulo(arg, self.mod)
+
+        raise TypeError("Expecting a congruence class or integer.")
 
     def __add__(self, other):
         """
         Modular addition.
-        
+
         >>> mod(1, 4) + mod(2, 4)
         modulo(3, 4)
         >>> mod(1, 4) + 2
@@ -66,7 +59,7 @@ class modulo():
     def __radd__(self, other):
         """
         Modular addition.
-        
+
         >>> mod(1, 4) + mod(2, 4)
         modulo(3, 4)
         >>> 2 + mod(1, 4)
@@ -80,7 +73,7 @@ class modulo():
     def __sub__(self, other):
         """
         Modular subtraction.
-        
+
         >>> mod(1, 4) - mod(2, 4)
         modulo(3, 4)
         >>> mod(1, 4) - 3
@@ -106,7 +99,7 @@ class modulo():
     def __mul__(self, other):
         """
         Modular multiplication.
-        
+
         >>> mod(1, 4) * mod(2, 4)
         modulo(2, 4)
         >>> mod(2, 7) * 3
@@ -140,12 +133,13 @@ class modulo():
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class or integer.")
+
         other = self._cc(other)
         (gcd, inv, _) = egcd(other.val, self.mod)
         if gcd > 1:
             raise ValueError("Congruence class has no inverse.")
-        else:
-            return modulo((self.val * inv) % self.mod, self.mod)
+
+        return modulo((self.val * inv) % self.mod, self.mod)
 
     def __pos__(self):
         """
@@ -169,7 +163,7 @@ class modulo():
             raise TypeError("Can only negate a congruence class.")
         return modulo((0 - self.val) % self.mod, self.mod)
 
-    def __pow__(self, other, mod = None):
+    def __pow__(self, other, mod = None): # pylint: disable=W0621
         """
         Modular exponentiation.
 
@@ -182,8 +176,10 @@ class modulo():
         """
         if self.val is None:
             raise TypeError("Can only exponentiate a congruence class.")
-        if type(other) is not int:
+
+        if not isinstance(other, int):
             raise TypeError("Exponent must be an integer.")
+
         if mod is not None and mod != self.mod:
             raise ValueError("Modulus does not match congruence class modulus.")
 
@@ -191,10 +187,10 @@ class modulo():
             (gcd, inv, _) = egcd(self.val, self.mod)
             if gcd > 1:
                 raise ValueError("Congruence class has no inverse.")
-            else:
-                return modulo(pow(inv % self.mod, 0-other, self.mod), self.mod)
-        else:
-            return modulo(pow(self.val, other, self.mod), self.mod)
+
+            return modulo(pow(inv % self.mod, 0-other, self.mod), self.mod)
+
+        return modulo(pow(self.val, other, self.mod), self.mod)
 
     def __contains__(self, other):
         """
@@ -212,18 +208,20 @@ class modulo():
         False
         """
         if self.val is None:
-            if type(other) is not modulo:
-                raise TypeError("Can only check a congruence class for membership in a finite field.")
-            else:
-                if other.val is None:
-                    raise TypeError("Cannot check if finite field is in another finite field.")
-                else:
-                    return self.mod == other.mod
-        else:
-            if type(other) is not int:
-                raise TypeError("Can only check if an integer is in a congruence class.")
-            else:
-                return (other % self.mod) == self.val
+            if not isinstance(other, modulo):
+                raise TypeError(
+                    "Can only check a congruence class for membership in a finite field."
+                )
+
+            if other.val is None:
+                raise TypeError("Cannot check if finite field is in another finite field.")
+
+            return self.mod == other.mod
+
+        if not isinstance(other, int):
+            raise TypeError("Can only check if an integer is in a congruence class.")
+
+        return (other % self.mod) == self.val
 
     def __repr__(self):
         return str(self)
@@ -231,7 +229,7 @@ class modulo():
     def __str__(self):
         """
         String representation.
-        
+
         >>> mod(2, 4)
         modulo(2, 4)
         """
@@ -241,29 +239,30 @@ class modulo():
     def __int__(self):
         """
         Conversion to the canonical integer representative of a congruence class.
-        
+
         >>> int(mod(2, 4))
         2
         """
         if self.val is None:
             raise TypeError("Can only convert a congruence class to an integer.")
+
         return self.val
 
     def __len__(self):
         """
         Number of elements in a set of congruence classes (i.e., a finite field).
-        
+
         >>> len(mod(36))
         36
         """
         if self.val is not None:
             raise TypeError("Cannot compute size of a congruence class.")
+
+
         return self.mod
 
+mod = modulo # Synonym. # pylint: disable=C0103
+Z = modulo # Synonym. # pylint: disable=C0103
 
-mod = modulo # Synonym.
-Z = modulo # Synonym.
-
-
-if __name__ == "__main__": 
+if __name__ == "__main__":
     doctest.testmod()

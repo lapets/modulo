@@ -1,2 +1,2 @@
-# Allow users to share and rebuild values.
+"""Gives users direct access to class."""
 from modulo.modulo import modulo, mod, Z
