@@ -4,9 +4,15 @@ modulo
 
 Pure Python library for working with modular arithmetic, congruence classes, and finite fields.
 
-.. image:: https://badge.fury.io/py/modulo.svg
+|pypi| |readthedocs|
+
+.. |pypi| image:: https://badge.fury.io/py/modulo.svg
    :target: https://badge.fury.io/py/modulo
    :alt: PyPI version and link.
+
+.. |readthedocs| image:: https://readthedocs.org/projects/modulo/badge/?version=latest
+   :target: https://modulo.readthedocs.io/en/latest/?badge=latest
+   :alt: Read the Docs documentation status.
 
 Purpose
 -------
