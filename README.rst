@@ -2,7 +2,7 @@
 modulo
 ======
 
-Pure Python library for working with modular arithmetic, congruence classes, and finite fields.
+Pure Python library for working with modular arithmetic and congruence classes.
 
 |pypi| |readthedocs| |actions| |coveralls|
 
@@ -24,7 +24,7 @@ Pure Python library for working with modular arithmetic, congruence classes, and
 
 Purpose
 -------
-The library allows users to work with congruence classes (or, equivalently, finite field elements) as objects, with support for many common operations.
+The library allows users to work with congruence classes (including finite field elements) as objects, with support for many common operations.
 
 Package Installation and Usage
 ------------------------------
