@@ -168,7 +168,7 @@ class modulo: # pylint: disable=C0103
 
         Attempts to invoke the operator on arguments having incorrect types raise
         exceptions.
-        
+
         >>> 3 - mod(4)
         Traceback (most recent call last):
           ...
@@ -191,7 +191,7 @@ class modulo: # pylint: disable=C0103
 
         Attempts to invoke the operator on arguments having incorrect types raise
         exceptions.
-        
+
         >>> mod(7) * 3
         Traceback (most recent call last):
           ...
@@ -265,7 +265,7 @@ class modulo: # pylint: disable=C0103
 
         Any attempt to invoke the operator on an argument having an incorrect
         type raises an exception.
-        
+
         >>> +mod(4)
         Traceback (most recent call last):
           ...
@@ -328,7 +328,7 @@ class modulo: # pylint: disable=C0103
         >>> pow(mod(4, 6), -1, 6)
         Traceback (most recent call last):
           ...
-        ValueError: congruence class has no inverse.
+        ValueError: congruence class has no inverse
         """
         if self.val is None:
             raise TypeError("can only exponentiate a congruence class")
@@ -365,14 +365,18 @@ class modulo: # pylint: disable=C0103
 
         Attempts to perform invalid membership checks raise exceptions.
 
+        >>> 3 in mod(4)
+        Traceback (most recent call last):
+          ...
+        TypeError: can only check if a congruence class is a member
         >>> mod(4) in mod(4)
         Traceback (most recent call last):
           ...
-        TypeError: "can only check if an integer or a congruence class is a member
+        TypeError: can only check if a congruence class is a member
         >>> 'a' in mod(7)
         Traceback (most recent call last):
           ...
-        TypeError: "can only check if an integer or a congruence class is a member
+        TypeError: can only check if a congruence class is a member
         >>> 'a' in mod(4, 7)
         Traceback (most recent call last):
           ...
@@ -381,7 +385,7 @@ class modulo: # pylint: disable=C0103
         if self.val is None:
             if (not isinstance(other, modulo)) or (other.val is None):
                 raise TypeError(
-                    "can only check if an integer or a congruence class is a member"
+                    "can only check if a congruence class is a member"
                 )
 
             return self.mod == other.mod
