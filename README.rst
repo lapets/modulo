@@ -36,6 +36,41 @@ The library can be imported in the usual way::
 
     from modulo import modulo
 
+Examples
+^^^^^^^^
+This library makes it possible to work with congruence classes (and sets of congruence classes such as finite fields) as objects. A congruence class is defined using a representative integer and a modulus::
+
+    >>> from modulo import modulo
+    >>> modulo(3, 7)
+    modulo(3, 7)
+
+Built-in operators can be used to perform modular addition, modular subtraction, and modular negation of congruence classes::
+
+    >>> modulo(3, 7) + modulo(5, 7)
+    modulo(1, 7)
+    >>> modulo(1, 7) - modulo(4, 7)
+    modulo(4, 7)
+    >>> -modulo(5, 7)
+    modulo(2, 7)
+
+Modular multiplication, division, inversion, and exponentiation are also supported (when they are defined)::
+
+    >>> modulo(3, 7) * modulo(5, 7)
+    modulo(1, 7)
+    >>> modulo(1, 7) // modulo(3, 7)
+    modulo(5, 7)
+    >>> modulo(5, 7) ** 2
+    modulo(4, 7)
+    >>> modulo(5, 7) ** (-1)
+    modulo(3, 7)
+
+A set of congruence classes such as a finite field can also be defined. The built-in length function and the membership operator are supported::
+
+    >>> len(modulo(7))
+    7
+    >>> modulo(3, 7) in modulo(7)
+    True
+
 Documentation
 -------------
 .. include:: toc.rst
