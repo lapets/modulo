@@ -10,7 +10,28 @@ from egcd import egcd
 class modulo: # pylint: disable=C0103
     """
     Class for representing both finite fields and congruence classes
-    (depending on the initialization arguments).
+    (depending on the initialization arguments). Common arithmetic and
+    membership operations are supported.
+
+    >>> mod(3, 7)
+    modulo(3, 7)
+    >>> mod(3, 7) + mod(2, 7)
+    modulo(5, 7)
+    >>> mod(0, 7) - mod(1, 7)
+    modulo(6, 7)
+    >>> mod(3, 7) * mod(2, 7)
+    modulo(6, 7)
+    >>> mod(3, 7) ** (-1)
+    modulo(5, 7)
+    >>> mod(3, 7) in mod(7)
+    True
+    >>> int(mod(3, 7))
+    3
+    >>> len(mod(7))
+    7
+
+    Constructor invocations involving arguments that have incorrect types raise
+    exceptions.
 
     >>> mod()
     Traceback (most recent call last):
@@ -26,6 +47,10 @@ class modulo: # pylint: disable=C0103
     ValueError: Element must be an integer.
     """
     def __init__(self: modulo, *args):
+        """
+        Create an instance of a set of congruence classes (*i.e.*, a finite field)
+        or an individual congruence class.
+        """
         if len(args) not in [1, 2]:
             raise TypeError("Must provide either a modulus or an integer and a modulus.")
 
@@ -42,8 +67,8 @@ class modulo: # pylint: disable=C0103
 
     def _cc(self: modulo, arg: Union[modulo, int]) -> modulo:
         """
-        Attempt to convert argument to a congruence class. Raise an appropriate
-        error if this is not possible.
+        Attempt to convert the supplied argument to a congruence class. Raise an
+        appropriate exception if this is not possible.
         """
         if isinstance(arg, modulo):
             if arg.val is not None:
@@ -59,12 +84,16 @@ class modulo: # pylint: disable=C0103
 
     def __add__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
-        Modular addition.
+        Perform modular addition.
 
         >>> mod(1, 4) + mod(2, 4)
         modulo(3, 4)
         >>> mod(1, 4) + 2
         modulo(3, 4)
+
+        Attempts to invoke the operator on arguments having incorrect types raise
+        exceptions.
+
         >>> mod(1, 3) + mod(2, 4)
         Traceback (most recent call last):
           ...
@@ -90,7 +119,7 @@ class modulo: # pylint: disable=C0103
 
     def __radd__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
-        Modular addition.
+        Perform modular addition.
 
         >>> mod(1, 4) + mod(2, 4)
         modulo(3, 4)
@@ -109,12 +138,16 @@ class modulo: # pylint: disable=C0103
 
     def __sub__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
-        Modular subtraction.
+        Perform modular subtraction.
 
         >>> mod(1, 4) - mod(2, 4)
         modulo(3, 4)
         >>> mod(1, 4) - 3
         modulo(2, 4)
+
+        Attempts to invoke the operator on arguments having incorrect types raise
+        exceptions.
+
         >>> mod(4) - 3
         Traceback (most recent call last):
           ...
@@ -128,10 +161,14 @@ class modulo: # pylint: disable=C0103
 
     def __rsub__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
-        Modular subtraction.
+        Perform modular subtraction.
 
         >>> 3 - mod(1, 4)
         modulo(2, 4)
+
+        Attempts to invoke the operator on arguments having incorrect types raise
+        exceptions.
+        
         >>> 3 - mod(4)
         Traceback (most recent call last):
           ...
@@ -145,12 +182,16 @@ class modulo: # pylint: disable=C0103
 
     def __mul__(self, other: Union[modulo, int]) -> modulo:
         """
-        Modular multiplication.
+        Perform modular multiplication.
 
         >>> mod(1, 4) * mod(2, 4)
         modulo(2, 4)
         >>> mod(2, 7) * 3
         modulo(6, 7)
+
+        Attempts to invoke the operator on arguments having incorrect types raise
+        exceptions.
+        
         >>> mod(7) * 3
         Traceback (most recent call last):
           ...
@@ -164,10 +205,14 @@ class modulo: # pylint: disable=C0103
 
     def __rmul__(self, other: Union[modulo, int]) -> modulo:
         """
-        Modular multiplication.
+        Perform modular multiplication.
 
         >>> 3 * mod(2, 7)
         modulo(6, 7)
+
+        Attempts to invoke the operator on arguments having incorrect types raise
+        exceptions.
+
         >>> 3 * mod(7)
         Traceback (most recent call last):
           ...
@@ -181,12 +226,17 @@ class modulo: # pylint: disable=C0103
 
     def __floordiv__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
-        Modular division.
+        Perform modular division (*i.e.*, multiplication by the inverse).
 
         >>> mod(4, 7) // mod(2, 7)
         modulo(2, 7)
         >>> mod(6, 17) // mod(3, 17)
         modulo(2, 17)
+
+        Any attempt to divide by a congruence class that is not invertible -- or
+        to invoke the operator on arguments that have incorrect types -- raises
+        exceptions.
+
         >>> mod(17) // mod(3, 17)
         Traceback (most recent call last):
           ...
@@ -208,10 +258,14 @@ class modulo: # pylint: disable=C0103
 
     def __pos__(self: modulo) -> modulo:
         """
-        Identify function on congruence classes.
+        Identity function on congruence classes.
 
         >>> +mod(4, 7)
         modulo(4, 7)
+
+        Any attempt to invoke the operator on an argument having an incorrect
+        type raises an exception.
+        
         >>> +mod(4)
         Traceback (most recent call last):
           ...
@@ -224,10 +278,14 @@ class modulo: # pylint: disable=C0103
 
     def __neg__(self: modulo) -> modulo:
         """
-        Identify function on congruence classes.
+        Return the additive inverse of a congruence class.
 
         >>> -mod(4, 7)
         modulo(3, 7)
+
+        Any attempt to invoke the operator on an argument having an incorrect
+        type raises an exception.
+
         >>> -mod(4)
         Traceback (most recent call last):
           ...
@@ -240,7 +298,7 @@ class modulo: # pylint: disable=C0103
 
     def __pow__(self: modulo, other: int, mod: int = None) -> modulo: # pylint: disable=W0621
         """
-        Modular exponentiation.
+        Perform modular exponentiation.
 
         >>> mod(4, 7) ** 3
         modulo(1, 7)
@@ -250,6 +308,11 @@ class modulo: # pylint: disable=C0103
         modulo(1, 7)
         >>> pow(mod(4, 7), 3, 7)
         modulo(1, 7)
+
+        Attempts to invoke the operator on arguments that lack required properties
+        (*e.g.*, congruence classes that are not invertible) -- or that have incorrect
+        types -- raise an exception.
+
         >>> pow(mod(7), 3)
         Traceback (most recent call last):
           ...
@@ -299,6 +362,9 @@ class modulo: # pylint: disable=C0103
         True
         >>> mod(4, 5) in mod(7)
         False
+
+        Attempts to perform invalid membership checks raise exceptions.
+
         >>> mod(4) in mod(4)
         Traceback (most recent call last):
           ...
@@ -330,29 +396,39 @@ class modulo: # pylint: disable=C0103
 
     def __repr__(self: modulo) -> str:
         """
-        String representation.
+        Return the string representation of this congruence class or set of
+        congruence classes.
 
         >>> mod(2, 4)
         modulo(2, 4)
+        >>> mod(7)
+        modulo(7)
         """
         return str(self)
 
     def __str__(self: modulo) -> str:
         """
-        String representation.
+        Return the string representation of this congruence class or set of
+        congruence classes.
 
         >>> mod(2, 4)
         modulo(2, 4)
+        >>> mod(7)
+        modulo(7)
         """
         ss = ([] if self.val is None else [str(self.val)]) + [str(self.mod)]
         return "modulo(" + ", ".join(ss) + ")"
 
     def __int__(self: modulo) -> int:
         """
-        Conversion to the canonical integer representative of a congruence class.
+        Return the canonical integer representative of a congruence class.
 
         >>> int(mod(2, 4))
         2
+
+        A set of congruence classes (*i.e.*, a finite field) cannot be represented
+        as a single integer.
+
         >>> int(mod(4))
         Traceback (most recent call last):
           ...
@@ -365,10 +441,15 @@ class modulo: # pylint: disable=C0103
 
     def __len__(self: modulo) -> int:
         """
-        Number of elements in a set of congruence classes (i.e., a finite field).
+        Return the number of elements in a set of congruence classes
+        (*i.e.*, a finite field).
 
         >>> len(mod(36))
         36
+
+        While a congruence class contains an infinite number of integers,
+        attempting to determine its size raises an exception.
+
         >>> len(mod(2, 4))
         Traceback (most recent call last):
           ...
