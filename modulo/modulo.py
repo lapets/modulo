@@ -11,6 +11,19 @@ class modulo: # pylint: disable=C0103
     """
     Class for representing both finite fields and congruence classes
     (depending on the initialization arguments).
+
+    >>> mod()
+    Traceback (most recent call last):
+      ...
+    TypeError: Must provide either a modulus or an integer and a modulus.
+    >>> mod(-2)
+    Traceback (most recent call last):
+      ...
+    ValueError: Modulus must be a positive integer.
+    >>> mod(1.2, 7)
+    Traceback (most recent call last):
+      ...
+    ValueError: Element must be an integer.
     """
     def __init__(self: modulo, *args):
         if len(args) not in [1, 2]:
@@ -52,6 +65,22 @@ class modulo: # pylint: disable=C0103
         modulo(3, 4)
         >>> mod(1, 4) + 2
         modulo(3, 4)
+        >>> mod(1, 3) + mod(2, 4)
+        Traceback (most recent call last):
+          ...
+        TypeError: Congruence classes do not have the same modulus.
+        >>> mod(1, 3) + mod(4)
+        Traceback (most recent call last):
+          ...
+        TypeError: Expecting a congruence class or integer.
+        >>> mod(1, 3) + 'a'
+        Traceback (most recent call last):
+          ...
+        TypeError: Expecting a congruence class or integer.
+        >>> mod(4) + 2
+        Traceback (most recent call last):
+          ...
+        TypeError: Expecting a congruence class or integer.
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class or integer.")
@@ -67,6 +96,10 @@ class modulo: # pylint: disable=C0103
         modulo(3, 4)
         >>> 2 + mod(1, 4)
         modulo(3, 4)
+        >>> 2 + mod(4)
+        Traceback (most recent call last):
+          ...
+        TypeError: Expecting a congruence class or integer.
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class or integer.")
@@ -82,6 +115,10 @@ class modulo: # pylint: disable=C0103
         modulo(3, 4)
         >>> mod(1, 4) - 3
         modulo(2, 4)
+        >>> mod(4) - 3
+        Traceback (most recent call last):
+          ...
+        TypeError: Expecting a congruence class or integer.
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class or integer.")
@@ -95,6 +132,10 @@ class modulo: # pylint: disable=C0103
 
         >>> 3 - mod(1, 4)
         modulo(2, 4)
+        >>> 3 - mod(4)
+        Traceback (most recent call last):
+          ...
+        TypeError: Expecting a congruence class or integer.
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class or integer.")
@@ -110,6 +151,10 @@ class modulo: # pylint: disable=C0103
         modulo(2, 4)
         >>> mod(2, 7) * 3
         modulo(6, 7)
+        >>> mod(7) * 3
+        Traceback (most recent call last):
+          ...
+        TypeError: Expecting a congruence class or integer.
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class or integer.")
@@ -123,6 +168,10 @@ class modulo: # pylint: disable=C0103
 
         >>> 3 * mod(2, 7)
         modulo(6, 7)
+        >>> 3 * mod(7)
+        Traceback (most recent call last):
+          ...
+        TypeError: Expecting a congruence class or integer.
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class or integer.")
@@ -138,6 +187,14 @@ class modulo: # pylint: disable=C0103
         modulo(2, 7)
         >>> mod(6, 17) // mod(3, 17)
         modulo(2, 17)
+        >>> mod(17) // mod(3, 17)
+        Traceback (most recent call last):
+          ...
+        TypeError: Expecting a congruence class or integer.
+        >>> mod(4, 6) // mod(2, 6)
+        Traceback (most recent call last):
+          ...
+        ValueError: Congruence class has no inverse.
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class or integer.")
@@ -155,6 +212,10 @@ class modulo: # pylint: disable=C0103
 
         >>> +mod(4, 7)
         modulo(4, 7)
+        >>> +mod(4)
+        Traceback (most recent call last):
+          ...
+        TypeError: Expecting a congruence class.
         """
         if self.val is None:
             raise TypeError("Expecting a congruence class.")
@@ -167,6 +228,10 @@ class modulo: # pylint: disable=C0103
 
         >>> -mod(4, 7)
         modulo(3, 7)
+        >>> -mod(4)
+        Traceback (most recent call last):
+          ...
+        TypeError: Can only negate a congruence class.
         """
         if self.val is None:
             raise TypeError("Can only negate a congruence class.")
@@ -179,10 +244,28 @@ class modulo: # pylint: disable=C0103
 
         >>> mod(4, 7) ** 3
         modulo(1, 7)
+        >>> mod(4, 7) ** (-1)
+        modulo(2, 7)
         >>> pow(mod(4, 7), 3)
         modulo(1, 7)
         >>> pow(mod(4, 7), 3, 7)
         modulo(1, 7)
+        >>> pow(mod(7), 3)
+        Traceback (most recent call last):
+          ...
+        TypeError: Can only exponentiate a congruence class.
+        >>> pow(mod(3, 7), 'a')
+        Traceback (most recent call last):
+          ...
+        TypeError: Exponent must be an integer.
+        >>> pow(mod(4, 7), 3, 8)
+        Traceback (most recent call last):
+          ...
+        ValueError: Modulus does not match congruence class modulus.
+        >>> pow(mod(4, 6), -1, 6)
+        Traceback (most recent call last):
+          ...
+        ValueError: Congruence class has no inverse.
         """
         if self.val is None:
             raise TypeError("Can only exponentiate a congruence class.")
@@ -216,6 +299,18 @@ class modulo: # pylint: disable=C0103
         True
         >>> mod(4, 5) in mod(7)
         False
+        >>> mod(4) in mod(4)
+        Traceback (most recent call last):
+          ...
+        TypeError: Cannot check if finite field is in another finite field.
+        >>> 'a' in mod(7)
+        Traceback (most recent call last):
+          ...
+        TypeError: Can only check a congruence class for membership in a finite field.
+        >>> 'a' in mod(4, 7)
+        Traceback (most recent call last):
+          ...
+        TypeError: Can only check if an integer is in a congruence class.
         """
         if self.val is None:
             if not isinstance(other, modulo):
@@ -234,6 +329,12 @@ class modulo: # pylint: disable=C0103
         return (other % self.mod) == self.val
 
     def __repr__(self: modulo) -> str:
+        """
+        String representation.
+
+        >>> mod(2, 4)
+        modulo(2, 4)
+        """
         return str(self)
 
     def __str__(self: modulo) -> str:
@@ -252,6 +353,10 @@ class modulo: # pylint: disable=C0103
 
         >>> int(mod(2, 4))
         2
+        >>> int(mod(4))
+        Traceback (most recent call last):
+          ...
+        TypeError: Can only convert a congruence class to an integer.
         """
         if self.val is None:
             raise TypeError("Can only convert a congruence class to an integer.")
@@ -264,6 +369,10 @@ class modulo: # pylint: disable=C0103
 
         >>> len(mod(36))
         36
+        >>> len(mod(2, 4))
+        Traceback (most recent call last):
+          ...
+        TypeError: Cannot compute size of a congruence class.
         """
         if self.val is not None:
             raise TypeError("Cannot compute size of a congruence class.")
@@ -274,4 +383,4 @@ mod = modulo # Synonym. # pylint: disable=C0103
 Z = modulo # Synonym. # pylint: disable=C0103
 
 if __name__ == "__main__":
-    doctest.testmod()
+    doctest.testmod() # pragma: no cover
