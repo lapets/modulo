@@ -10,8 +10,8 @@ Pure Python library for working with modular arithmetic and congruence classes.
    :target: https://badge.fury.io/py/modulo
    :alt: PyPI version and link.
 
-.. |readthedocs| image:: https://readthedocs.org/projects/modulo/badge/?version=latest
-   :target: https://modulo.readthedocs.io/en/latest/?badge=latest
+.. |readthedocs| image:: https://readthedocs.org/projects/modulo-lib/badge/?version=latest
+   :target: https://modulo-lib.readthedocs.io/en/latest/?badge=latest
    :alt: Read the Docs documentation status.
 
 .. |actions| image:: https://github.com/lapets/modulo/workflows/lint-test-cover-docs/badge.svg
