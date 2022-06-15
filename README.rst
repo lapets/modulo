@@ -64,6 +64,13 @@ Modular multiplication, division, inversion, and exponentiation are also support
     >>> modulo(5, 7) ** (-1)
     modulo(3, 7)
 
+Individual congruence classes can be compared with one another according to their least nonnegative residues (and, thus, can also be sorted)::
+
+    >>> mod(2, 7) < mod(3, 7)
+    True
+    >>> list(sorted([mod(2, 3), mod(1, 3), mod(0, 3)]))
+    [modulo(0, 3), modulo(1, 3), modulo(2, 3)]
+
 A set of congruence classes such as a finite field can also be defined. The built-in length function and the membership operator are supported::
 
     >>> len(modulo(7))

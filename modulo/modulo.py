@@ -46,6 +46,14 @@ class modulo:
     >>> 4 in mod(3, 7)
     False
 
+    Individual congruence classes can be compared with one another according to
+    their least nonnegative residues (and, thus, can also be sorted).
+
+    >>> mod(2, 7) < mod(3, 7)
+    True
+    >>> list(sorted([mod(2, 3), mod(1, 3), mod(0, 3)]))
+    [modulo(0, 3), modulo(1, 3), modulo(2, 3)]
+
     When one integer argument is supplied, the created instance represents the
     set containing the congruence classes modulo that integer. The instance
     ``mod(7)`` in the example below represents the set **Z**/7\ **Z**.
@@ -415,6 +423,118 @@ class modulo:
         False
         """
         return not self == other
+
+    def __lt__(self: modulo, other: modulo) -> bool:
+        """
+        Allow comparison and sorting of congruence classes (according to their
+        canonical nonnegative representative integers).
+
+        >>> mod(2, 7) < mod(3, 7)
+        True
+        >>> mod(3, 7) < mod(3, 7)
+        False
+        >>> mod(5, 7) < mod(3, 7)
+        False
+        >>> mod(9, 7) < mod(3, 7)
+        True
+        >>> list(sorted([mod(2, 3), mod(1, 3), mod(0, 3)]))
+        [modulo(0, 3), modulo(1, 3), modulo(2, 3)]
+
+        Sets of congruence classes cannot be compared.
+
+        >>> mod(3) < mod(5)
+        Traceback (most recent call last):
+          ...
+        ValueError: sets of congruence classes cannot be compared
+        """
+        if self.val is None or other.val is None:
+            raise ValueError("sets of congruence classes cannot be compared")
+
+        return self.val < other.val
+
+    def __le__(self: modulo, other: modulo) -> bool:
+        """
+        Allow comparison and sorting of congruence classes (according to their
+        canonical nonnegative representative integers).
+
+        >>> mod(2, 7) <= mod(3, 7)
+        True
+        >>> mod(3, 7) <= mod(3, 7)
+        True
+        >>> mod(5, 7) <= mod(3, 7)
+        False
+        >>> mod(9, 7) <= mod(3, 7)
+        True
+        >>> list(sorted([mod(2, 3), mod(1, 3), mod(0, 3)]))
+        [modulo(0, 3), modulo(1, 3), modulo(2, 3)]
+
+        Sets of congruence classes cannot be compared.
+
+        >>> mod(3) <= mod(5)
+        Traceback (most recent call last):
+          ...
+        ValueError: sets of congruence classes cannot be compared
+        """
+        if self.val is None or other.val is None:
+            raise ValueError("sets of congruence classes cannot be compared")
+
+        return self.val <= other.val
+
+    def __gt__(self: modulo, other: modulo) -> bool:
+        """
+        Allow comparison and sorting of congruence classes (according to their
+        canonical nonnegative representative integers).
+
+        >>> mod(3, 7) > mod(2, 7)
+        True
+        >>> mod(3, 7) > mod(3, 7)
+        False
+        >>> mod(1, 7) > mod(3, 7)
+        False
+        >>> mod(3, 7) > mod(9, 7)
+        True
+        >>> list(sorted([mod(2, 3), mod(1, 3), mod(0, 3)]))
+        [modulo(0, 3), modulo(1, 3), modulo(2, 3)]
+
+        Sets of congruence classes cannot be compared.
+
+        >>> mod(3) > mod(5)
+        Traceback (most recent call last):
+          ...
+        ValueError: sets of congruence classes cannot be compared
+        """
+        if self.val is None or other.val is None:
+            raise ValueError("sets of congruence classes cannot be compared")
+
+        return self.val > other.val
+
+    def __ge__(self: modulo, other: modulo) -> bool:
+        """
+        Allow comparison and sorting of congruence classes (according to their
+        canonical nonnegative representative integers).
+
+        >>> mod(3, 7) >= mod(2, 7)
+        True
+        >>> mod(3, 7) >= mod(3, 7)
+        True
+        >>> mod(1, 7) >= mod(3, 7)
+        False
+        >>> mod(3, 7) >= mod(9, 7)
+        True
+        >>> list(sorted([mod(2, 3), mod(1, 3), mod(0, 3)]))
+        [modulo(0, 3), modulo(1, 3), modulo(2, 3)]
+
+        Sets of congruence classes cannot be compared.
+
+        >>> mod(3) >= mod(5)
+        Traceback (most recent call last):
+          ...
+        ValueError: sets of congruence classes cannot be compared
+        """
+        if self.val is None or other.val is None:
+            raise ValueError("sets of congruence classes cannot be compared")
+
+        return self.val >= other.val
 
     def __contains__(self: modulo, other: Union[modulo, int]) -> bool:
         """
