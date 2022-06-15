@@ -9,7 +9,44 @@ import doctest
 from math import gcd
 from egcd import egcd
 
-class modulo:
+class _symbol(type):
+    """
+    Metaclass to enable the use of a class as a mathematical symbol within
+    expressions.
+    """
+    def __new__(cls, clsname, bases, attrs):
+        return super(_symbol, cls).__new__(cls, clsname, bases, attrs)
+
+    def __rmul__(cls: _symbol, other: int) -> modulo:
+        """
+        Enable use of the :obj:`modulo` class and its synonyms as a
+        mathematical symbol, enabling construction of congruence class
+        instances via a concise and familiar notation.
+
+        >>> 4*Z
+        modulo(0, 4)
+        """
+        return modulo(0, other)
+
+    def __truediv__(cls: _symbol, other: modulo) -> modulo:
+        """
+        Enable use of the :obj:`modulo` class and its synonyms as a
+        mathematical symbol, enabling construction of sets of congruence
+        classes via a concise and familiar notation.
+
+        >>> Z/(4*Z)
+        modulo(4)
+        >>> Z/(1 + 4*Z)
+        Traceback (most recent call last):
+          ...
+        ValueError: second argument must be a congruence class represented by 0
+        """
+        if other.val != 0:
+            raise ValueError("second argument must be a congruence class represented by 0")
+
+        return modulo(other.mod)
+
+class modulo(metaclass=_symbol):
     # pylint: disable=C0103,W1401 # Accommodate class name and backslash notation in docstring.
     """
     Class for representing both *individual congruence classes* (*e.g.*, finite
@@ -89,6 +126,22 @@ class modulo:
     modulo(423, 4900)
     >>> mod(2, 10) & mod(4, 20) is None
     True
+
+    Special methods such as :obj:`~modulo.__getitem__` and synonyms such as
+    :obj:`Z` make it possible to use a number of different forms of notation
+    for creating congruence classes and sets thereof.
+
+    >>> Z/(23*Z)
+    modulo(23)
+    >>> 23*Z
+    modulo(0, 23)
+    >>> 17 + 23*Z
+    modulo(17, 23)
+    >>> 17 % mod(23)
+    modulo(17, 23)
+    >>> cs = mod(23)
+    >>> cs[17]
+    modulo(17, 23)
 
     Constructor invocations involving arguments that have incorrect types raise
     exceptions.
@@ -192,19 +245,25 @@ class modulo:
 
     def __radd__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
-        Perform modular addition.
+        If this instance is a congruence class, perform modular addition of
+        congruence classes (even if the left-hand argument is an integer)
+        representative of a congruence class).
 
         >>> mod(1, 4) + mod(2, 4)
         modulo(3, 4)
         >>> 2 + mod(1, 4)
         modulo(3, 4)
+
+        If this instance is a set of congruence classes, support use of
+        familiar mathematical notation to construct congruence classes.
+
         >>> 2 + mod(4)
-        Traceback (most recent call last):
-          ...
-        TypeError: expecting a congruence class or integer
+        modulo(2, 4)
+        >>> 2 + 4*Z
+        modulo(2, 4)
         """
         if self.val is None:
-            raise TypeError("expecting a congruence class or integer")
+            return modulo(other, self.mod)
 
         other = self._cc(other)
         return modulo((self.val + other.val) % self.mod, self.mod)
@@ -442,6 +501,48 @@ class modulo:
         """
         return self ** (-1)
 
+    def __mod__(self: modulo, other: int) -> modulo:
+        """
+        If this instance is a congruence class, return a congruence class with
+        a modified modulus attribute.
+
+        >>> mod(3, 10) % 7
+        modulo(3, 7)
+        >>> mod(11, 23) % 2
+        modulo(1, 2)
+
+        This operation is only defined for congruence classes.
+
+        >>> mod(10) % 2
+        Traceback (most recent call last):
+          ...
+        ValueError: modulus cannot be modified for a set of congruence classes
+        """
+        if self.val is None:
+            raise ValueError("modulus cannot be modified for a set of congruence classes")
+
+        return modulo(self.val, other)
+
+    def __rmod__(self: modulo, other: int) -> modulo:
+        """
+        If this instance is a set of congruence classes, construct a congruence class
+        corresponding to the supplied integer.
+
+        >>> 7 % mod(11)
+        modulo(7, 11)
+
+        This operation is only defined for a set of congruence classes.
+
+        >>> 7 % mod(3, 11)
+        Traceback (most recent call last):
+          ...
+        ValueError: expecting a set of congruence classes as the second argument
+        """
+        if self.val is not None:
+            raise ValueError("expecting a set of congruence classes as the second argument")
+
+        return modulo(other, self.mod)
+
     def __truediv__(self: modulo, other: int) -> modulo:
         """
         Transform a congruence class into a related congruence class that is
@@ -547,7 +648,6 @@ class modulo:
                 )),
                 modulus
             )
-
 
         if self.val is None and other.val is None:
             return self if self == other else set()
@@ -772,6 +872,26 @@ class modulo:
 
         for c in range(0, self.mod):
             yield modulo(c, self.mod)
+
+    def __getitem__(self: modulo, index: int) -> Union[modulo, int]:
+        """
+        Allow efficient retrieval of individual members of a congruence class
+        or set of congruence classes.
+
+        >>> cs = modulo(7)
+        >>> cs[2]
+        modulo(2, 7)
+        >>> cs[-2]
+        modulo(5, 7)
+        >>> c = modulo(2, 7)
+        >>> c[0]
+        2
+        >>> c[-1]
+        -5
+        >>> c[2]
+        16
+        """
+        return modulo(index, self.mod) if self.val is None else self.val + index * self.mod
 
     def __repr__(self: modulo) -> str:
         """

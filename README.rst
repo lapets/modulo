@@ -95,6 +95,15 @@ The `Chinese remainder theorem <https://en.wikipedia.org/wiki/Chinese_remainder_
     >>> mod(2, 10) & mod(4, 20) is None
     True
 
+Some familiar forms of notation for referring to congruence classes (and sets thereof) are also supported::
+
+    >>> Z/(23*Z)
+    modulo(23)
+    >>> 23*Z
+    modulo(0, 23)
+    >>> 17 + 23*Z
+    modulo(17, 23)
+
 Development
 -----------
 All installation and development dependencies are managed using `setuptools <https://pypi.org/project/setuptools>`__ and are fully specified in ``setup.py``. The ``extras_require`` parameter is used to `specify optional requirements <https://setuptools.pypa.io/en/latest/userguide/dependency_management.html#optional-dependencies>`__ for various development tasks. This makes it possible to specify additional options (such as ``docs``, ``lint``, and so on) when performing installation using `pip <https://pypi.org/project/pip>`__::
