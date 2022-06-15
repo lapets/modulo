@@ -5,7 +5,7 @@ with open('README.rst', 'r') as fh:
 
 # The lines below are parsed by `docs/conf.py`.
 name = 'modulo'
-version = '0.3.0'
+version = '1.0.0'
 
 setup(
     name=name,

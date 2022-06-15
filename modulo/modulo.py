@@ -380,6 +380,42 @@ class modulo:
 
         return modulo(pow(self.val, other, self.mod), self.mod)
 
+    def __eq__(self: modulo, other: modulo) -> bool:
+        """
+        Return a boolean value indicating whether this instance represents the
+        same congruence class or set of congruence classes as the other instance.
+
+        >>> mod(3, 7) == mod(3, 7)
+        True
+        >>> mod(2, 7) == mod(3, 7)
+        False
+        >>> mod(4) == mod(4)
+        True
+        >>> mod(5) == mod(7)
+        False
+        """
+        return (
+            self.mod == other.mod and \
+            (self.val == other.val or (self.val is None and other.val is None))
+        )
+
+    def __ne__(self: modulo, other: modulo) -> bool:
+        """
+        Return a boolean value indicating whether this instance represents a
+        different congruence class (or set of congruence classes) than the
+        other instance.
+
+        >>> mod(2, 7) != mod(3, 7)
+        True
+        >>> mod(3, 7) != mod(3, 7)
+        False
+        >>> mod(5) != mod(7)
+        True
+        >>> mod(4) != mod(4)
+        False
+        """
+        return not self == other
+
     def __contains__(self: modulo, other: Union[modulo, int]) -> bool:
         """
         Membership function for integers, congruence classes, and sets of congruence classes.
