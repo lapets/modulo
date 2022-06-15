@@ -1,20 +1,32 @@
 """
-Pure Python library for working with modular arithmetic and
-congruence classes.
+Pure-Python library for working with modular arithmetic, congruence classes,
+and finite fields.
 """
 from __future__ import annotations
 from typing import Union
 import doctest
 from egcd import egcd
 
-class modulo: # pylint: disable=C0103
+class modulo:
+    # pylint: disable=C0103,W1401 # Accommodate class name and backslash notation in docstring.
     """
-    Class for representing both sets of congruence classes (*e.g.*, rings and
-    finite fields) and individual congruence classes (*e.g.*, finite field
-    elements). Common arithmetic and membership operations are supported.
+    Class for representing both *individual congruence classes* (*e.g.*, finite
+    field elements) and *sets of congruence classes* (*e.g.*, rings and finite
+    fields such as **Z**/7\ **Z**). Common arithmetic and membership operations
+    are supported for each, as appropriate.
+
+    When two integer arguments are supplied, the created instance represents
+    the individual congruence class corresponding to the remainder of the
+    first argument modulo the second argument. The instance ``mod(3, 7)``
+    in the example below represents the congruence class 3 in the set
+    **Z**/7\ **Z**.
 
     >>> mod(3, 7)
     modulo(3, 7)
+
+    Common modular arithmetic operations and the membership operator (via the
+    method :obj:`__contains__`) are supported for congruence class instances.
+
     >>> mod(3, 7) + mod(2, 7)
     modulo(5, 7)
     >>> mod(0, 7) - mod(1, 7)
@@ -27,8 +39,26 @@ class modulo: # pylint: disable=C0103
     True
     >>> int(mod(3, 7))
     3
+    >>> 3 in mod(3, 7)
+    True
+    >>> 10 in mod(3, 7)
+    True
+    >>> 4 in mod(3, 7)
+    False
+
+    When one integer argument is supplied, the created instance represents the
+    set containing the congruence classes modulo that integer. The instance
+    ``mod(7)`` in the example below represents the set **Z**/7\ **Z**.
+
     >>> len(mod(7))
     7
+
+    The membership operation for individual congruence classes is supported.
+
+    >>> mod(3, 7) in mod(7)
+    True
+    >>> mod(1, 2) in mod(7)
+    False
 
     Constructor invocations involving arguments that have incorrect types raise
     exceptions.
@@ -304,6 +334,8 @@ class modulo: # pylint: disable=C0103
         modulo(1, 7)
         >>> mod(4, 7) ** (-1)
         modulo(2, 7)
+        >>> mod(4, 7) ** (-2)
+        modulo(4, 7)
         >>> pow(mod(4, 7), 3)
         modulo(1, 7)
         >>> pow(mod(4, 7), 3, 7)
@@ -463,8 +495,15 @@ class modulo: # pylint: disable=C0103
 
         return self.mod
 
-mod = modulo # Synonym. # pylint: disable=C0103
-Z = modulo # Synonym. # pylint: disable=C0103
+mod = modulo # pylint: disable=C0103
+"""
+Alias for :obj:`modulo`.
+"""
+
+Z = modulo # pylint: disable=C0103
+"""
+Alias for :obj:`modulo`.
+"""
 
 if __name__ == "__main__":
     doctest.testmod() # pragma: no cover

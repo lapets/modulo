@@ -39,7 +39,7 @@ setup(
     url='https://github.com/lapets/modulo',
     author='Andrei Lapets',
     author_email='a@lapets.io',
-    description='Pure Python library for working with modular arithmetic, ' + \
+    description='Pure-Python library for working with modular arithmetic, ' + \
                 'congruence classes, and finite fields.',
     long_description=long_description,
     long_description_content_type='text/x-rst',

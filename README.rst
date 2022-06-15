@@ -38,7 +38,7 @@ The library can be imported in the usual way::
 
 Examples
 ^^^^^^^^
-This library makes it possible to work with congruence classes (and sets of congruence classes such as finite fields) as objects. A congruence class is defined using a representative integer and a modulus::
+This library makes it possible to work with `congruence classes <https://en.wikipedia.org/wiki/Congruence_relation>`__ (and sets of congruence classes such as finite fields) as objects. A congruence class is defined using a representative integer and a modulus::
 
     >>> from modulo import modulo
     >>> modulo(3, 7)
