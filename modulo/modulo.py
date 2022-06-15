@@ -4,6 +4,7 @@ and finite fields.
 """
 from __future__ import annotations
 from typing import Union
+from collections.abc import Iterable
 import doctest
 from egcd import egcd
 
@@ -68,6 +69,17 @@ class modulo:
     >>> mod(1, 2) in mod(7)
     False
 
+    Congruence classes and sets of congruence classes are also hashable (making
+    it possible to use them as dictionary keys and as set members) and iterable.
+
+    >>> list(mod(4))
+    [modulo(0, 4), modulo(1, 4), modulo(2, 4), modulo(3, 4)]
+    >>> len({mod(0, 3), mod(1, 3), mod(2, 3)})
+    3
+    >>> from itertools import islice
+    >>> list(islice(mod(3, 7), 5))
+    [3, 10, 17, 24, 31]
+
     Constructor invocations involving arguments that have incorrect types raise
     exceptions.
 
@@ -119,6 +131,19 @@ class modulo:
             return modulo(arg, self.mod)
 
         raise TypeError("expecting a congruence class or integer")
+
+    def __hash__(self: modulo) -> int:
+        """
+        Allow use of congruence classes and sets of congruence classes within
+        contexts that require hashable objects (*e.g.*, as dictionary keys or
+        as elements in sets).
+
+        >>> len({mod(0, 3), mod(1, 3), mod(2, 3)})
+        3
+        >>> {mod(3)}
+        {modulo(3)}
+        """
+        return hash((self.val, self.mod))
 
     def __add__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
@@ -584,6 +609,26 @@ class modulo:
             )
 
         return (other % self.mod) == self.val
+
+    def __iter__(self: modulo) -> Union[Iterable[int], Iterable[modulo]]:
+        """
+        Allow iteration over all nonnegative (infinitely many) members (if this
+        instance is a congruence class), or all congruence classes (if this
+        instance is a set of congruence classes).
+
+        >>> [i for (_, i) in zip(range(5), mod(3, 7))]
+        [3, 10, 17, 24, 31]
+        >>> list(mod(4))
+        [modulo(0, 4), modulo(1, 4), modulo(2, 4), modulo(3, 4)]
+        """
+        if self.val is not None:
+            member = self.val
+            while True:
+                yield member
+                member += self.mod
+
+        for c in range(0, self.mod):
+            yield modulo(c, self.mod)
 
     def __repr__(self: modulo) -> str:
         """

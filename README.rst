@@ -78,6 +78,16 @@ A set of congruence classes such as a finite field can also be defined. The buil
     >>> modulo(3, 7) in modulo(7)
     True
 
+Congruence classes and sets of congruence classes are also hashable (making it possible to use them as dictionary keys and as set members) and iterable::
+
+    >>> len({mod(0, 3), mod(1, 3), mod(2, 3)})
+    3
+    >>> list(mod(4))
+    [modulo(0, 4), modulo(1, 4), modulo(2, 4), modulo(3, 4)]
+    >>> from itertools import islice
+    >>> list(islice(mod(3, 7), 5))
+    [3, 10, 17, 24, 31]
+
 Development
 -----------
 All installation and development dependencies are managed using `setuptools <https://pypi.org/project/setuptools>`__ and are fully specified in ``setup.py``. The ``extras_require`` parameter is used to `specify optional requirements <https://setuptools.pypa.io/en/latest/userguide/dependency_management.html#optional-dependencies>`__ for various development tasks. This makes it possible to specify additional options (such as ``docs``, ``lint``, and so on) when performing installation using `pip <https://pypi.org/project/pip>`__::
