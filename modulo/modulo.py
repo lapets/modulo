@@ -629,7 +629,8 @@ class modulo(metaclass=_symbol):
         >>> mod(2, 3) & mod(7)
         Traceback (most recent call last):
           ...
-        ValueError: intersection must be of two congruence classes or two sets thereof
+        ValueError: intersection operation is only defined for two congruence classes or two \
+sets thereof
         """
         if self.val is not None and other.val is not None:
             g = gcd(self.mod, other.mod)
@@ -653,7 +654,8 @@ class modulo(metaclass=_symbol):
             return self if self == other else set()
 
         raise ValueError(
-            "intersection must be of two congruence classes or two sets thereof"
+            "intersection operation is only defined for two congruence classes " + \
+            "or two sets thereof"
         )
 
     def __eq__(self: modulo, other: modulo) -> bool:
@@ -852,6 +854,34 @@ class modulo(metaclass=_symbol):
             )
 
         return (other % self.mod) == self.val
+
+    def issubset(self: modulo, other: modulo) -> bool:
+        """
+        Return a boolean value indicating whether a congruence class of integers
+        is a subset of another congruence class of integers.
+
+        >>> mod(2, 8).issubset(mod(2, 4))
+        True
+        >>> mod(6, 8).issubset(mod(2, 4))
+        True
+        >>> mod(3, 4).issubset(mod(0, 2))
+        False
+
+        Only pairs of congruence classes can be compared using this method.
+
+        >>> mod(6).issubset(mod(2, 4))
+        Traceback (most recent call last):
+          ...
+        ValueError: subset relationship is only defined between congruence classes
+        >>> mod(2, 8).issubset(mod(4))
+        Traceback (most recent call last):
+          ...
+        ValueError: subset relationship is only defined between congruence classes
+        """
+        if self.val is None or other.val is None:
+            raise ValueError("subset relationship is only defined between congruence classes")
+
+        return (self.val % other.mod) == other.val
 
     def __iter__(self: modulo) -> Union[Iterable[int], Iterable[modulo]]:
         """
