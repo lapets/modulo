@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import Union
 from collections.abc import Iterable
 import doctest
+from math import gcd
 from egcd import egcd
 
 class modulo:
@@ -79,6 +80,15 @@ class modulo:
     >>> from itertools import islice
     >>> list(islice(mod(3, 7), 5))
     [3, 10, 17, 24, 31]
+
+    The `Chinese remainder theorem <https://en.wikipedia.org/wiki/Chinese_remainder_theorem>`__
+    can be applied to construct the intersection of two congruence classes as a
+    congruence class (when it is possible to do so).
+
+    >>> mod(23, 100) & mod(31, 49)
+    modulo(423, 4900)
+    >>> mod(2, 10) & mod(4, 20) is None
+    True
 
     Constructor invocations involving arguments that have incorrect types raise
     exceptions.
@@ -313,8 +323,8 @@ class modulo:
             raise TypeError("expecting a congruence class or integer")
 
         other = self._cc(other)
-        (gcd, inv, _) = egcd(other.val, self.mod)
-        if gcd > 1:
+        (gcd_, inv, _) = egcd(other.val, self.mod)
+        if gcd_ > 1:
             raise ValueError("congruence class has no inverse")
 
         return modulo((self.val * inv) % self.mod, self.mod)
@@ -361,7 +371,8 @@ class modulo:
 
     def __pow__(self: modulo, other: int, mod: int = None) -> modulo: # pylint: disable=W0621
         """
-        Perform modular exponentiation.
+        Perform modular exponentiation (including inversion, if the supplied
+        exponent is negative).
 
         >>> mod(4, 7) ** 3
         modulo(1, 7)
@@ -405,13 +416,145 @@ class modulo:
             raise ValueError("modulus does not match congruence class modulus")
 
         if other < 0:
-            (gcd, inv, _) = egcd(self.val, self.mod)
-            if gcd > 1:
+            (gcd_, inv, _) = egcd(self.val, self.mod)
+            if gcd_ > 1:
                 raise ValueError("congruence class has no inverse")
 
-            return modulo(pow(inv % self.mod, 0-other, self.mod), self.mod)
+            return modulo(pow(inv % self.mod, 0 - other, self.mod), self.mod)
 
         return modulo(pow(self.val, other, self.mod), self.mod)
+
+    def __invert__(self: modulo) -> modulo:
+        """
+        Return the multiplicative inverse of a congruence class.
+
+        >>> ~mod(4, 7)
+        modulo(2, 7)
+
+        Any attempt to invoke the operator on an instance that lacks the required
+        properties (*e.g.*, a congruence class that is not invertible) raises an
+        exception.
+
+        >>> ~mod(4, 6)
+        Traceback (most recent call last):
+          ...
+        ValueError: congruence class has no inverse
+        """
+        return self ** (-1)
+
+    def __truediv__(self: modulo, other: int) -> modulo:
+        """
+        Transform a congruence class into a related congruence class that is
+        obtained by dividing both the value and the modulus by the same positive
+        integer.
+
+        >>> mod(2, 10) / 2
+        modulo(1, 5)
+
+        Both the value and modulus must be divisible by the supplied integer.
+
+        >>> mod(3, 4) / 2
+        Traceback (most recent call last):
+          ...
+        ValueError: value and modulus must both be divisible by the supplied integer
+        >>> mod(3, 9) / 3.0
+        Traceback (most recent call last):
+          ...
+        TypeError: second argument must be an integer
+
+        This method is made available primarily for use in applying the Chinese
+        remainder theorem (*e.g.*, as is done in :obj:`modulo.__and__`) and
+        similar processes.
+        """
+        if not isinstance(other, int):
+            raise TypeError("second argument must be an integer")
+
+        if gcd(self.val, other) != other or gcd(self.mod, other) != other:
+            raise ValueError("value and modulus must both be divisible by the supplied integer")
+
+        return modulo(self.val // other, self.mod // other)
+
+    def __and__(self: modulo, other: modulo) -> Union[modulo, set, None]:
+        """
+        Return the intersection of two congruence classes, represented as a
+        congruence class. The result is constructed via an application of the
+        `Chinese remainder theorem <https://en.wikipedia.org/wiki/Chinese_remainder_theorem>`__).
+
+        >>> mod(2, 3) & mod(4, 5)
+        modulo(14, 15)
+        >>> mod(1, 10) & mod(1, 14)
+        modulo(1, 70)
+        >>> mod(2, 10) & mod(2, 14)
+        modulo(2, 70)
+        >>> mod(23, 100) & mod(31, 49)
+        modulo(423, 4900)
+        >>> mod(2, 10) & mod(4, 20) is None
+        True
+
+        The example below compares the outputs from this method (across a range of
+        inputs) with the results of an exhaustive search. Note the use of congruence
+        class instances as iterables (via :obj:`modulo.__iter__`).
+
+        >>> from itertools import islice
+        >>> all(
+        ...     int(modulo(a, m) & modulo(b, n)) in (
+        ...         set(islice(modulo(a, m), 20)) & set(islice(modulo(b, n), 20))
+        ...     )
+        ...     for m in range(1, 20) for a in range(m)
+        ...     for n in range(1, 20) for b in range(n)
+        ...     if (a % gcd(m, n) == b % gcd(m, n))
+        ... )
+        True
+        >>> all(
+        ...     (modulo(a, m) & modulo(b, n) is None) and (
+        ...         set(islice(modulo(a, m), 20)) & set(islice(modulo(b, n), 20)) == set()
+        ...     )
+        ...     for m in range(1, 20) for a in range(m)
+        ...     for n in range(1, 20) for b in range(n)
+        ...     if (a % gcd(m, n) != b % gcd(m, n))
+        ... )
+        True
+
+        This operation is defined for sets of congruence classes. However, the only possible
+        outputs are the empty set or the input itself (if both inputs are the same).
+
+        >>> mod(3) & mod(3)
+        modulo(3)
+        >>> mod(4) & mod(5)
+        set()
+
+        Both arguments must be congruence classes or both arguments must be sets thereof.
+
+        >>> mod(2, 3) & mod(7)
+        Traceback (most recent call last):
+          ...
+        ValueError: intersection must be of two congruence classes or two sets thereof
+        """
+        if self.val is not None and other.val is not None:
+            g = gcd(self.mod, other.mod)
+            modulus = (self.mod * other.mod) // g
+            r = self.val % g
+
+            if other.val % g != r:
+                return None
+
+            other_mod = modulo(other.mod, self.mod) / g
+            self_mod = modulo(self.mod, other.mod) / g
+            return modulo(
+                r + (g * (
+                    (((self.val - r) // g) * (other.mod // g) * int(~other_mod)) + \
+                    (((other.val - r) // g) * (self.mod // g) * int(~self_mod))
+                )),
+                modulus
+            )
+
+
+        if self.val is None and other.val is None:
+            return self if self == other else set()
+
+        raise ValueError(
+            "intersection must be of two congruence classes or two sets thereof"
+        )
 
     def __eq__(self: modulo, other: modulo) -> bool:
         """

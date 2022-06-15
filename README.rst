@@ -88,6 +88,13 @@ Congruence classes and sets of congruence classes are also hashable (making it p
     >>> list(islice(mod(3, 7), 5))
     [3, 10, 17, 24, 31]
 
+The `Chinese remainder theorem <https://en.wikipedia.org/wiki/Chinese_remainder_theorem>`__ can be applied to construct the intersection of two congruence classes as a congruence class (when it is possible to do so)::
+
+    >>> mod(23, 100) & mod(31, 49)
+    modulo(423, 4900)
+    >>> mod(2, 10) & mod(4, 20) is None
+    True
+
 Development
 -----------
 All installation and development dependencies are managed using `setuptools <https://pypi.org/project/setuptools>`__ and are fully specified in ``setup.py``. The ``extras_require`` parameter is used to `specify optional requirements <https://setuptools.pypa.io/en/latest/userguide/dependency_management.html#optional-dependencies>`__ for various development tasks. This makes it possible to specify additional options (such as ``docs``, ``lint``, and so on) when performing installation using `pip <https://pypi.org/project/pip>`__::
