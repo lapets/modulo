@@ -62,10 +62,10 @@ class _symbol(type):
         if not isinstance(other, modulo):
             raise TypeError('right-hand argument must be a congruence class')
 
-        if other.val != 0:
+        if other.residue != 0:
             raise ValueError('right-hand argument must be a congruence class represented by 0')
 
-        return modulo(other.mod)
+        return modulo(other.modulus)
 
 class modulo(metaclass=_symbol):
     # pylint: disable=C0103,W1401 # Accommodate class name and backslash notation in docstring.
@@ -77,15 +77,17 @@ class modulo(metaclass=_symbol):
 
     When two integer arguments are supplied, the created instance represents
     the individual congruence class corresponding to the remainder of the
-    first argument modulo the second argument. The instance ``mod(3, 7)``
+    first argument modulo the second argument. The instance ``modulo(3, 7)``
     in the example below represents the congruence class 3 in the set
-    **Z**/7\ **Z**.
+    **Z**/7\ **Z**. Note that **the synonym** :obj:`mod` **is made available to
+    support more concise notation and is used throughout this documentation.**
 
     >>> mod(3, 7)
     modulo(3, 7)
 
     Common modular arithmetic operations and the membership operator (via the
-    method :obj:`__contains__`) are supported for congruence class instances.
+    special method :obj:`modulo.__contains__`) are supported for congruence
+    class instances.
 
     >>> mod(3, 7) + mod(2, 7)
     modulo(5, 7)
@@ -121,12 +123,24 @@ class modulo(metaclass=_symbol):
     >>> len(mod(7))
     7
 
-    The membership operation for individual congruence classes is supported.
+    Use of the membership operation is also supported for individual congruence
+    classes that are themselves members of a set of congruence classes.
 
     >>> mod(3, 7) in mod(7)
     True
     >>> mod(1, 2) in mod(7)
     False
+
+    The built-in :obj:`int` function can be used to retrieve the least nonnegative
+    residue of an instance (see :obj:`modulo.__int__`) and the built-in :obj:`len`
+    function can be used to retrieve the modulus of an instance (see
+    :obj:`modulo.__len__`).
+
+    >>> c = modulo(3, 7)
+    >>> int(c)
+    3
+    >>> len(c)
+    7
 
     Congruence classes and sets of congruence classes are also hashable (making
     it possible to use them as dictionary keys and as set members) and iterable.
@@ -148,7 +162,7 @@ class modulo(metaclass=_symbol):
     >>> mod(2, 10) & mod(4, 20) is None
     True
 
-    Special methods such as :obj:`~modulo.__getitem__` and synonyms such as
+    Special methods such as :obj:`modulo.__getitem__` and synonyms such as
     :obj:`Z` make it possible to use a number of different forms of notation
     for creating congruence classes and sets thereof.
 
@@ -178,7 +192,7 @@ class modulo(metaclass=_symbol):
     >>> mod(1.2, 7)
     Traceback (most recent call last):
       ...
-    ValueError: value must be an integer
+    ValueError: residue must be an integer
     """
     def __init__(self: modulo, *args: Union[int, Sequence[int]]):
         """
@@ -188,16 +202,16 @@ class modulo(metaclass=_symbol):
         if len(args) not in [1, 2]:
             raise TypeError('must provide either a modulus or an integer and a modulus')
 
-        self.mod = args[-1]
-        if not isinstance(self.mod, int) or self.mod <= 0:
+        self.modulus = args[-1]
+        if not isinstance(self.modulus, int) or self.modulus <= 0:
             raise ValueError('modulus must be a positive integer')
 
-        self.val = None
+        self.residue = None
         if len(args) == 2:
-            self.val = args[0]
-            if not isinstance(self.val, int):
-                raise ValueError('value must be an integer')
-            self.val = self.val % self.mod
+            self.residue = args[0]
+            if not isinstance(self.residue, int):
+                raise ValueError('residue must be an integer')
+            self.residue = self.residue % self.modulus
 
     def _cc(self: modulo, arg: Union[modulo, int]) -> modulo:
         """
@@ -205,14 +219,14 @@ class modulo(metaclass=_symbol):
         appropriate exception if this is not possible.
         """
         if isinstance(arg, modulo):
-            if arg.val is not None:
-                if self.mod == arg.mod:
+            if arg.residue is not None:
+                if self.modulus == arg.modulus:
                     return arg
                 raise ValueError('congruence classes do not have the same modulus')
             raise TypeError('expecting a congruence class or integer')
 
         if isinstance(arg, int):
-            return modulo(arg, self.mod)
+            return modulo(arg, self.modulus)
 
         raise TypeError('expecting a congruence class or integer')
 
@@ -223,10 +237,10 @@ class modulo(metaclass=_symbol):
         if not isinstance(other, modulo):
             raise TypeError('expecting a congruence class')
 
-        if self.val is None or other.val is None:
+        if self.residue is None or other.residue is None:
             raise ValueError('sets of congruence classes cannot be compared')
 
-        if self.mod != other.mod:
+        if self.modulus != other.modulus:
             raise ValueError('congruence classes do not have the same modulus')
 
     def __hash__(self: modulo) -> int:
@@ -240,7 +254,7 @@ class modulo(metaclass=_symbol):
         >>> {mod(3)}
         {modulo(3)}
         """
-        return hash((self.val, self.mod))
+        return hash((self.residue, self.modulus))
 
     def __add__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
@@ -271,17 +285,17 @@ class modulo(metaclass=_symbol):
           ...
         TypeError: expecting a congruence class or integer
         """
-        if self.val is None:
+        if self.residue is None:
             raise TypeError('expecting a congruence class or integer')
 
         other = self._cc(other)
-        return modulo((self.val + other.val) % self.mod, self.mod)
+        return modulo((self.residue + other.residue) % self.modulus, self.modulus)
 
     def __radd__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
         If this instance is a congruence class, perform modular addition of
-        congruence classes (even if the left-hand argument is an integer)
-        representative of a congruence class).
+        congruence classes (even if the left-hand argument is an integer
+        and/or representative of a congruence class).
 
         >>> mod(1, 4) + mod(2, 4)
         modulo(3, 4)
@@ -296,11 +310,11 @@ class modulo(metaclass=_symbol):
         >>> 2 + 4*Z
         modulo(2, 4)
         """
-        if self.val is None:
-            return modulo(other, self.mod)
+        if self.residue is None:
+            return modulo(other, self.modulus)
 
         other = self._cc(other)
-        return modulo((self.val + other.val) % self.mod, self.mod)
+        return modulo((self.residue + other.residue) % self.modulus, self.modulus)
 
     def __sub__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
@@ -319,11 +333,11 @@ class modulo(metaclass=_symbol):
           ...
         TypeError: expecting a congruence class or integer
         """
-        if self.val is None:
+        if self.residue is None:
             raise TypeError('expecting a congruence class or integer')
 
         other = self._cc(other)
-        return modulo((self.val - other.val) % self.mod, self.mod)
+        return modulo((self.residue - other.residue) % self.modulus, self.modulus)
 
     def __rsub__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
@@ -340,11 +354,11 @@ class modulo(metaclass=_symbol):
           ...
         TypeError: expecting a congruence class or integer
         """
-        if self.val is None:
+        if self.residue is None:
             raise TypeError('expecting a congruence class or integer')
 
         other = self._cc(other)
-        return modulo((other.val - self.val) % self.mod, self.mod)
+        return modulo((other.residue - self.residue) % self.modulus, self.modulus)
 
     def __pos__(self: modulo) -> modulo:
         """
@@ -361,10 +375,10 @@ class modulo(metaclass=_symbol):
           ...
         TypeError: expecting a congruence class
         """
-        if self.val is None:
+        if self.residue is None:
             raise TypeError('expecting a congruence class')
 
-        return modulo(self.val, self.mod)
+        return modulo(self.residue, self.modulus)
 
     def __neg__(self: modulo) -> modulo:
         """
@@ -381,10 +395,10 @@ class modulo(metaclass=_symbol):
           ...
         TypeError: can only negate a congruence class
         """
-        if self.val is None:
+        if self.residue is None:
             raise TypeError('can only negate a congruence class')
 
-        return modulo((0 - self.val) % self.mod, self.mod)
+        return modulo((0 - self.residue) % self.modulus, self.modulus)
 
     def __mul__(self, other: Union[modulo, int]) -> modulo:
         """
@@ -403,11 +417,11 @@ class modulo(metaclass=_symbol):
           ...
         TypeError: expecting a congruence class or integer
         """
-        if self.val is None:
+        if self.residue is None:
             raise TypeError('expecting a congruence class or integer')
 
         other = self._cc(other)
-        return modulo((self.val * other.val) % self.mod, self.mod)
+        return modulo((self.residue * other.residue) % self.modulus, self.modulus)
 
     def __rmul__(self, other: Union[modulo, int]) -> modulo:
         """
@@ -424,11 +438,11 @@ class modulo(metaclass=_symbol):
           ...
         TypeError: expecting a congruence class or integer
         """
-        if self.val is None:
+        if self.residue is None:
             raise TypeError('expecting a congruence class or integer')
 
         other = self._cc(other)
-        return modulo((self.val * other.val) % self.mod, self.mod)
+        return modulo((self.residue * other.residue) % self.modulus, self.modulus)
 
     def __floordiv__(self: modulo, other: Union[modulo, int]) -> modulo:
         """
@@ -452,15 +466,15 @@ class modulo(metaclass=_symbol):
           ...
         ValueError: congruence class has no inverse
         """
-        if self.val is None:
+        if self.residue is None:
             raise TypeError('expecting a congruence class or integer')
 
         other = self._cc(other)
-        (gcd_, inv, _) = egcd(other.val, self.mod)
+        (gcd_, inv, _) = egcd(other.residue, self.modulus)
         if gcd_ > 1:
             raise ValueError('congruence class has no inverse')
 
-        return modulo((self.val * inv) % self.mod, self.mod)
+        return modulo((self.residue * inv) % self.modulus, self.modulus)
 
     def __pow__(self: modulo, other: int, mod: int = None) -> modulo: # pylint: disable=W0621
         """
@@ -499,23 +513,23 @@ class modulo(metaclass=_symbol):
           ...
         ValueError: congruence class has no inverse
         """
-        if self.val is None:
+        if self.residue is None:
             raise TypeError('can only exponentiate a congruence class')
 
         if not isinstance(other, int):
             raise TypeError('exponent must be an integer')
 
-        if mod is not None and mod != self.mod:
+        if mod is not None and mod != self.modulus:
             raise ValueError('modulus does not match congruence class modulus')
 
         if other < 0:
-            (gcd_, inv, _) = egcd(self.val, self.mod)
+            (gcd_, inv, _) = egcd(self.residue, self.modulus)
             if gcd_ > 1:
                 raise ValueError('congruence class has no inverse')
 
-            return modulo(pow(inv % self.mod, 0 - other, self.mod), self.mod)
+            return modulo(pow(inv % self.modulus, 0 - other, self.modulus), self.modulus)
 
-        return modulo(pow(self.val, other, self.mod), self.mod)
+        return modulo(pow(self.residue, other, self.modulus), self.modulus)
 
     def __invert__(self: modulo) -> modulo:
         """
@@ -557,13 +571,13 @@ class modulo(metaclass=_symbol):
           ...
         TypeError: right-hand argument must be an integer
         """
-        if self.val is None:
+        if self.residue is None:
             raise ValueError('modulus cannot be modified for a set of congruence classes')
 
         if not isinstance(other, int):
             raise TypeError('right-hand argument must be an integer')
 
-        return modulo(self.val, other)
+        return modulo(self.residue, other)
 
     def __rmod__(self: modulo, other: int) -> modulo:
         """
@@ -584,24 +598,24 @@ class modulo(metaclass=_symbol):
           ...
         TypeError: left-hand argument must be an integer
         """
-        if self.val is not None:
+        if self.residue is not None:
             raise ValueError('expecting a set of congruence classes as the second argument')
 
         if not isinstance(other, int):
             raise TypeError('left-hand argument must be an integer')
 
-        return modulo(other, self.mod)
+        return modulo(other, self.modulus)
 
     def __truediv__(self: modulo, other: int) -> modulo:
         """
         Transform a congruence class into a related congruence class that is
-        obtained by dividing both the value and the modulus by the same positive
+        obtained by dividing both the residue and the modulus by the same positive
         integer.
 
         >>> mod(2, 10) / 2
         modulo(1, 5)
 
-        Only a congruence class can be transformed, and both the value and modulus
+        Only a congruence class can be transformed, and both the residue and modulus
         must be divisible by the supplied integer.
 
         >>> mod(4) / 2
@@ -611,7 +625,7 @@ class modulo(metaclass=_symbol):
         >>> mod(3, 4) / 2
         Traceback (most recent call last):
           ...
-        ValueError: value and modulus must both be divisible by the supplied integer
+        ValueError: residue and modulus must both be divisible by the supplied integer
         >>> mod(3, 9) / 3.0
         Traceback (most recent call last):
           ...
@@ -621,16 +635,16 @@ class modulo(metaclass=_symbol):
         remainder theorem (*e.g.*, as is done in :obj:`modulo.__and__`) and
         similar processes.
         """
-        if self.val is None:
+        if self.residue is None:
             raise ValueError('can only transform a congruence class')
 
         if not isinstance(other, int):
             raise TypeError('second argument must be an integer')
 
-        if gcd(self.val, other) != other or gcd(self.mod, other) != other:
-            raise ValueError('value and modulus must both be divisible by the supplied integer')
+        if gcd(self.residue, other) != other or gcd(self.modulus, other) != other:
+            raise ValueError('residue and modulus must both be divisible by the supplied integer')
 
-        return modulo(self.val // other, self.mod // other)
+        return modulo(self.residue // other, self.modulus // other)
 
     def __and__(self: modulo, other: modulo) -> Union[modulo, set, None]:
         """
@@ -687,24 +701,24 @@ class modulo(metaclass=_symbol):
         if not isinstance(other, modulo):
             raise TypeError('expecting a congruence class')
 
-        if self.val is None or other.val is None:
+        if self.residue is None or other.residue is None:
             raise ValueError(
                 'intersection operation is only defined for two congruence classes'
             )
 
-        g = gcd(self.mod, other.mod)
-        modulus = (self.mod * other.mod) // g
-        r = self.val % g
+        g = gcd(self.modulus, other.modulus)
+        modulus = (self.modulus * other.modulus) // g
+        r = self.residue % g
 
-        if other.val % g != r:
+        if other.residue % g != r:
             return None
 
-        other_mod = modulo(other.mod, self.mod) / g
-        self_mod = modulo(self.mod, other.mod) / g
+        other_mod = modulo(other.modulus, self.modulus) / g
+        self_mod = modulo(self.modulus, other.modulus) / g
         return modulo(
             r + (g * (
-                (((self.val - r) // g) * (other.mod // g) * int(~other_mod)) + \
-                (((other.val - r) // g) * (self.mod // g) * int(~self_mod))
+                (((self.residue - r) // g) * (other.modulus // g) * int(~other_mod)) + \
+                (((other.residue - r) // g) * (self.modulus // g) * int(~self_mod))
             )),
             modulus
         )
@@ -734,8 +748,8 @@ class modulo(metaclass=_symbol):
             raise TypeError('expecting a congruence class or set of congruence classes')
 
         return (
-            self.mod == other.mod and \
-            (self.val == other.val or (self.val is None and other.val is None))
+            self.modulus == other.modulus and \
+            (self.residue == other.residue or (self.residue is None and other.residue is None))
         )
 
     def __ne__(self: modulo, other: modulo) -> bool:
@@ -765,7 +779,7 @@ class modulo(metaclass=_symbol):
     def __lt__(self: modulo, other: modulo) -> bool:
         """
         Allow comparison and sorting of congruence classes (according to their
-        canonical nonnegative representative integers).
+        least nonnegative residues).
 
         >>> mod(2, 7) < mod(3, 7)
         True
@@ -795,12 +809,12 @@ class modulo(metaclass=_symbol):
         TypeError: expecting a congruence class
         """
         self._comparable(other)
-        return self.val < other.val
+        return self.residue < other.residue
 
     def __le__(self: modulo, other: modulo) -> bool:
         """
         Allow comparison and sorting of congruence classes (according to their
-        canonical nonnegative representative integers).
+        least nonnegative residues).
 
         >>> mod(2, 7) <= mod(3, 7)
         True
@@ -814,12 +828,12 @@ class modulo(metaclass=_symbol):
         [modulo(0, 3), modulo(1, 3), modulo(2, 3)]
         """
         self._comparable(other)
-        return self.val <= other.val
+        return self.residue <= other.residue
 
     def __gt__(self: modulo, other: modulo) -> bool:
         """
         Allow comparison and sorting of congruence classes (according to their
-        canonical nonnegative representative integers).
+        least nonnegative residues).
 
         >>> mod(3, 7) > mod(2, 7)
         True
@@ -833,12 +847,12 @@ class modulo(metaclass=_symbol):
         [modulo(0, 3), modulo(1, 3), modulo(2, 3)]
         """
         self._comparable(other)
-        return self.val > other.val
+        return self.residue > other.residue
 
     def __ge__(self: modulo, other: modulo) -> bool:
         """
         Allow comparison and sorting of congruence classes (according to their
-        canonical nonnegative representative integers).
+        least nonnegative residues).
 
         >>> mod(3, 7) >= mod(2, 7)
         True
@@ -852,7 +866,7 @@ class modulo(metaclass=_symbol):
         [modulo(0, 3), modulo(1, 3), modulo(2, 3)]
         """
         self._comparable(other)
-        return self.val >= other.val
+        return self.residue >= other.residue
 
     def __contains__(self: modulo, other: Union[modulo, int]) -> bool:
         """
@@ -888,24 +902,24 @@ class modulo(metaclass=_symbol):
           ...
         TypeError: can only check if an integer is a member of a congruence class
         """
-        if self.val is None:
+        if self.residue is None:
             if not isinstance(other, modulo):
                 raise TypeError(
                     'can only check if a congruence class is a member of a set of ' + \
                     'congruence classes'
                 )
 
-            if other.val is None:
+            if other.residue is None:
                 raise TypeError('can only check if a congruence class is a member')
 
-            return self.mod == other.mod
+            return self.modulus == other.modulus
 
         if not isinstance(other, int):
             raise TypeError(
                 'can only check if an integer is a member of a congruence class'
             )
 
-        return (other % self.mod) == self.val
+        return (other % self.modulus) == self.residue
 
     def issubset(self: modulo, other: modulo) -> bool:
         """
@@ -937,12 +951,12 @@ class modulo(metaclass=_symbol):
         if not isinstance(other, modulo):
             raise TypeError('expecting a congruence class')
 
-        if self.val is None or other.val is None:
+        if self.residue is None or other.residue is None:
             raise ValueError(
                 'subset relationship is only defined between congruence classes'
             )
 
-        return (self.val % other.mod) == other.val
+        return (self.residue % other.modulus) == other.residue
 
     def __iter__(self: modulo) -> Union[Iterable[int], Iterable[modulo]]:
         """
@@ -955,14 +969,14 @@ class modulo(metaclass=_symbol):
         >>> list(mod(4))
         [modulo(0, 4), modulo(1, 4), modulo(2, 4), modulo(3, 4)]
         """
-        if self.val is not None:
-            member = self.val
+        if self.residue is not None:
+            member = self.residue
             while True:
                 yield member
-                member += self.mod
+                member += self.modulus
 
-        for c in range(0, self.mod):
-            yield modulo(c, self.mod)
+        for c in range(0, self.modulus):
+            yield modulo(c, self.modulus)
 
     def __getitem__(self: modulo, index: int) -> Union[modulo, int]:
         """
@@ -992,32 +1006,32 @@ class modulo(metaclass=_symbol):
         if not isinstance(index, int):
             raise TypeError('index must be an integer')
 
-        return modulo(index, self.mod) if self.val is None else self.val + index * self.mod
+        return (
+            modulo(index, self.modulus)
+            if self.residue is None else
+            self.residue + index * self.modulus
+        )
 
     def __len__(self: modulo) -> int:
         """
         Return the number of elements in a set of congruence classes
-        (*e.g.*, a ring or finite field).
+        (*e.g.*, a ring or finite field) or the modulus for a congruence
+        class.
 
         >>> len(mod(36))
         36
-
-        While a congruence class contains an infinite number of integers,
-        attempting to determine its size raises an exception.
-
         >>> len(mod(2, 4))
-        Traceback (most recent call last):
-          ...
-        TypeError: cannot determine size of a congruence class
-        """
-        if self.val is not None:
-            raise TypeError('cannot determine size of a congruence class')
+        4
 
-        return self.mod
+        Use of the built-in :obj:`len` function is the recommended approach
+        for retrieving the ``modulus`` attribute of a :obj:`modulo` instance.
+        """
+        return self.modulus
 
     def __int__(self: modulo) -> int:
         """
-        Return the canonical integer representative of a congruence class.
+        Return the least nonnegative residue (*i.e.*, the canonical integer
+        representative) of an instance that represents a congruence class.
 
         >>> int(mod(2, 4))
         2
@@ -1029,11 +1043,14 @@ class modulo(metaclass=_symbol):
         Traceback (most recent call last):
           ...
         TypeError: can only convert a congruence class to an integer
+
+        Use of the built-in :obj:`int` function is the recommended approach
+        for retrieving the ``residue`` attribute of a :obj:`modulo` instance.
         """
-        if self.val is None:
+        if self.residue is None:
             raise TypeError('can only convert a congruence class to an integer')
 
-        return self.val
+        return self.residue
 
     def __repr__(self: modulo) -> str:
         """
@@ -1057,7 +1074,7 @@ class modulo(metaclass=_symbol):
         >>> mod(7)
         modulo(7)
         """
-        ss = ([] if self.val is None else [str(self.val)]) + [str(self.mod)]
+        ss = ([] if self.residue is None else [str(self.residue)]) + [str(self.modulus)]
         return "modulo(" + ", ".join(ss) + ")"
 
 mod = modulo # pylint: disable=C0103

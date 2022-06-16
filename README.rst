@@ -71,12 +71,26 @@ Individual congruence classes can be compared with one another according to thei
     >>> list(sorted([mod(2, 3), mod(1, 3), mod(0, 3)]))
     [modulo(0, 3), modulo(1, 3), modulo(2, 3)]
 
-A set of congruence classes such as a finite field can also be defined. The built-in length function and the membership operator are supported::
+.. |len| replace:: ``len``
+.. _len: https://docs.python.org/3/library/functions.html#len
+
+A set of congruence classes such as a finite field can also be defined. The built-in length function |len|_ and the membership operator are supported::
 
     >>> len(modulo(7))
     7
     >>> modulo(3, 7) in modulo(7)
     True
+
+.. |int| replace:: ``int``
+.. _int: https://docs.python.org/3/library/functions.html#int
+
+The built-in |int|_ function can be used to retrieve the least nonnegative residue of a congruence class and the built-in |len|_ function can be used to retrieve the modulus of a congruence class or set of congruence classes (this is the recommended approach)::
+
+    >>> c = modulo(3, 7)
+    >>> int(c)
+    3
+    >>> len(c)
+    7
 
 Congruence classes and sets of congruence classes are also hashable (making it possible to use them as dictionary keys and as set members) and iterable::
 
