@@ -71,6 +71,15 @@ Individual congruence classes can be compared with one another according to thei
     >>> list(sorted([mod(2, 3), mod(1, 3), mod(0, 3)]))
     [modulo(0, 3), modulo(1, 3), modulo(2, 3)]
 
+The membership operation is supported between integers and congruence classes::
+
+    >>> 3 in mod(3, 7)
+    True
+    >>> 10 in mod(3, 7)
+    True
+    >>> 4 in mod(3, 7)
+    False
+
 .. |len| replace:: ``len``
 .. _len: https://docs.python.org/3/library/functions.html#len
 
