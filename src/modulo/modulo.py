@@ -476,7 +476,9 @@ class modulo(metaclass=_symbol):
 
         return modulo((self.residue * inv) % self.modulus, self.modulus)
 
-    def __pow__(self: modulo, other: int, mod: int = None) -> modulo: # pylint: disable=W0621
+    def __pow__( # pylint: disable=W0621 # Support parameter name in Python docs.
+            self: modulo, other: Union[int, modulo], modulo: int = None
+        ) -> modulo:
         """
         Perform modular exponentiation (including inversion, if the supplied
         exponent is negative).
@@ -492,6 +494,14 @@ class modulo(metaclass=_symbol):
         >>> pow(mod(4, 7), 3, 7)
         modulo(1, 7)
 
+        The exponent can be an integer or an instance of :obj:`modulo`. The
+        latter option can enable concise notation when exponent values are
+        treated as elements within their own group (such as when leveraging
+        `Euler's theorem <https://en.wikipedia.org/wiki/Euler%27s_theorem>`__).
+
+        >>> pow(mod(4, 7), mod(2, 6)) * pow(mod(4, 7), mod(4, 6))
+        modulo(1, 7)
+
         Attempts to invoke the operator on arguments that lack required properties
         (*e.g.*, congruence classes that are not invertible) -- or that have incorrect
         types -- raise an exception.
@@ -503,7 +513,7 @@ class modulo(metaclass=_symbol):
         >>> pow(mod(3, 7), 'a')
         Traceback (most recent call last):
           ...
-        TypeError: exponent must be an integer
+        TypeError: exponent must be an integer or congruence class
         >>> pow(mod(4, 7), 3, 8)
         Traceback (most recent call last):
           ...
@@ -513,23 +523,35 @@ class modulo(metaclass=_symbol):
           ...
         ValueError: congruence class has no inverse
         """
+        # Support the parameter ``modulo`` as it appears in the Python documentation,
+        # but restore the module-specific naming convention within the remainder of
+        # the body of this method.
+        modulus = modulo
+        modulo = mod
+
         if self.residue is None:
             raise TypeError('can only exponentiate a congruence class')
 
-        if not isinstance(other, int):
-            raise TypeError('exponent must be an integer')
+        if not isinstance(other, (int, modulo)):
+            raise TypeError('exponent must be an integer or congruence class')
 
-        if mod is not None and mod != self.modulus:
+        if modulus is not None and modulus != self.modulus:
             raise ValueError('modulus does not match congruence class modulus')
 
-        if other < 0:
+        base = self.residue
+
+        if isinstance(other, int) and other < 0:
             (gcd_, inv, _) = egcd(self.residue, self.modulus)
             if gcd_ > 1:
                 raise ValueError('congruence class has no inverse')
 
-            return modulo(pow(inv % self.modulus, 0 - other, self.modulus), self.modulus)
+            base = inv % self.modulus
+            other = 0 - other
 
-        return modulo(pow(self.residue, other, self.modulus), self.modulus)
+        if isinstance(other, modulo):
+            other = int(other)
+
+        return modulo(pow(base, other, self.modulus), self.modulus)
 
     def __invert__(self: modulo) -> modulo:
         """
@@ -1075,7 +1097,7 @@ class modulo(metaclass=_symbol):
         modulo(7)
         """
         ss = ([] if self.residue is None else [str(self.residue)]) + [str(self.modulus)]
-        return "modulo(" + ", ".join(ss) + ")"
+        return 'modulo(' + ', '.join(ss) + ')'
 
 mod = modulo # pylint: disable=C0103
 """
@@ -1087,5 +1109,5 @@ Z = modulo # pylint: disable=C0103
 Alias for :obj:`modulo`.
 """
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     doctest.testmod() # pragma: no cover
