@@ -10,6 +10,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import importlib.metadata
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
@@ -17,15 +18,23 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-# The name and version are retrieved from `setup.py` in the root directory.
-with open('../setup.py') as package_file:
-    package = package_file.read()
-project = package.split("name = '")[1].split("'")[0]
-version = package.split("version = '")[1].split("'")[0]
+# The name and version are retrieved from ``pyproject.toml`` in the root
+# directory.
+import toml
+with open('../pyproject.toml') as pyproject_file:
+    pyproject_data = toml.load(pyproject_file)
+project = pyproject_data['project']['name']
+version = pyproject_data['project']['version']
 release = version
 
-author = 'Andrei Lapets'
-copyright = '2018, Andrei Lapets' # Period omitted; precedes punctuation.
+# The copyright year and holder information is retrieved from the
+# ``LICENSE`` file.
+import re
+with open('../LICENSE', 'r') as license_file:
+    license_string = license_file.read().split('Copyright (c) ')[1]
+year = license_string[:4]
+author = license_string[5:].split('\n')[0]
+copyright = year + ', ' + re.sub(r"\.$", "", author) # Period already in HTML.
 
 
 # -- General configuration ---------------------------------------------------
@@ -63,9 +72,17 @@ autodoc_default_options = {
 }
 autodoc_preserve_defaults = True
 
-# Allow references to classes defined in the Python documentation.
+# Allow references/links to definitions found in the Python documentation
+# and in the documentation for this package's dependencies.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
+    'egcd': (
+        (
+            'https://egcd.readthedocs.io/en/' + \
+            importlib.metadata.version('egcd')
+        ),
+        None
+    ),
 }
 
 
