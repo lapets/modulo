@@ -10,7 +10,6 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import importlib.metadata
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../src'))
@@ -74,15 +73,20 @@ autodoc_preserve_defaults = True
 
 # Allow references/links to definitions found in the Python documentation
 # and in the documentation for this package's dependencies.
+
+def rtd_url_for_installed_version(name):
+    prefix = 'https://' + name + '.readthedocs.io/en/'
+
+    if sys.version_info.major == 3 and sys.version_info.minor == 7:
+        import pkg_resources
+        return prefix + pkg_resources.get_distribution('egcd').version
+
+    import importlib.metadata
+    return prefix + importlib.metadata.version('egcd')
+
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
-    'egcd': (
-        (
-            'https://egcd.readthedocs.io/en/' + \
-            importlib.metadata.version('egcd')
-        ),
-        None
-    ),
+    'egcd': (rtd_url_for_installed_version('egcd'), None),
 }
 
 
