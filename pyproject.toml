@@ -1,6 +1,6 @@
 [project]
 name = "modulo"
-version = "2.0.0"
+version = "2.0.1"
 description = """\
     Pure-Python library for working with modular arithmetic, \
     congruence classes, and finite fields.\
@@ -18,7 +18,7 @@ dependencies = [
 
 [project.urls]
 Repository = "https://github.com/lapets/modulo"
-Documentation = "https://modulo.readthedocs.io"
+Documentation = "https://modulo-lib.readthedocs.io"
 
 [project.optional-dependencies]
 docs = [
