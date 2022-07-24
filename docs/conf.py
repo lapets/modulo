@@ -12,7 +12,7 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../src'))
+sys.path.insert(0, os.path.abspath('../src')) # Prioritize local module copy.
 
 
 # -- Project information -----------------------------------------------------
@@ -79,10 +79,10 @@ def rtd_url_for_installed_version(name):
 
     if sys.version_info.major == 3 and sys.version_info.minor == 7:
         import pkg_resources
-        return prefix + pkg_resources.get_distribution('egcd').version
+        return prefix + pkg_resources.get_distribution(name).version
 
     import importlib.metadata
-    return prefix + importlib.metadata.version('egcd')
+    return prefix + importlib.metadata.version(name)
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
