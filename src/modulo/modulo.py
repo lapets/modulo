@@ -9,7 +9,7 @@ import doctest
 from math import gcd
 from egcd import egcd
 
-class _symbol(type):
+class _symbol(type): # pylint: disable=invalid-name # Private/internal class.
     """
     Metaclass to enable the use of a class as a mathematical symbol within
     expressions.
@@ -68,7 +68,7 @@ class _symbol(type):
         return modulo(other.modulus)
 
 class modulo(metaclass=_symbol):
-    # pylint: disable=C0103,W1401 # Accommodate class name and backslash notation in docstring.
+    # pylint: disable=anomalous-backslash-in-string # Allow backslashes in docstring.
     """
     Class for representing both *individual congruence classes* (*e.g.*, finite
     field elements) and *sets of congruence classes* (*e.g.*, rings and finite
@@ -476,8 +476,10 @@ class modulo(metaclass=_symbol):
 
         return modulo((self.residue * inv) % self.modulus, self.modulus)
 
-    def __pow__( # pylint: disable=W0621 # Support parameter name in Python docs.
-            self: modulo, other: Union[int, modulo], modulo: int = None
+    def __pow__(
+            self: modulo,
+            other: Union[int, modulo],
+            modulo: int = None # pylint: disable=redefined-outer-name # Parameter from Python docs.
         ) -> modulo:
         """
         Perform modular exponentiation (including inversion, if the supplied
@@ -1099,12 +1101,12 @@ class modulo(metaclass=_symbol):
         ss = ([] if self.residue is None else [str(self.residue)]) + [str(self.modulus)]
         return 'modulo(' + ', '.join(ss) + ')'
 
-mod = modulo # pylint: disable=C0103
+mod: type = modulo
 """
 Alias for :obj:`modulo`.
 """
 
-Z = modulo # pylint: disable=C0103
+Z: type = modulo
 """
 Alias for :obj:`modulo`.
 """

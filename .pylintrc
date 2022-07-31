@@ -9,8 +9,9 @@ analyse-fallback-blocks=no
 # all available extensions.
 #enable-all-extensions=
 
-# In error mode, checkers without error messages are disabled and for others,
-# only the ERROR messages are displayed, and no reports are done by default.
+# In error mode, messages with a category besides ERROR or FATAL are
+# suppressed, and no reports are done by default. Error mode is compatible with
+# disabling specific errors.
 #errors-only=
 
 # Always return a 0 (non-error) status code, even if lint errors are found.
@@ -209,7 +210,7 @@ class-naming-style=PascalCase
 
 # Regular expression matching correct class names. Overrides class-naming-
 # style. If left empty, class names will be checked with the set naming style.
-#class-rgx=
+class-rgx=^[a-zA-Z][a-z0-9]*(_[a-z0-9]+)*$
 
 # Naming style matching correct constant names.
 const-naming-style=UPPER_CASE
@@ -291,7 +292,7 @@ variable-naming-style=snake_case
 # Regular expression matching correct variable names. Overrides variable-
 # naming-style. If left empty, variable names will be checked with the set
 # naming style.
-#variable-rgx=
+variable-rgx=^(_?)[a-z][a-z0-9]*(_[a-z0-9]+)*(_?)(_?)$
 
 
 [CLASSES]
