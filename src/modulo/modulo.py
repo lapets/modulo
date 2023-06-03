@@ -14,8 +14,8 @@ class _symbol(type): # pylint: disable=invalid-name # Private/internal class.
     Metaclass to enable the use of a class as a mathematical symbol within
     expressions.
     """
-    def __new__(cls, clsname, bases, attrs):
-        return super(_symbol, cls).__new__(cls, clsname, bases, attrs)
+    def __new__(mcs, clsname, bases, attrs):
+        return super(_symbol, mcs).__new__(mcs, clsname, bases, attrs)
 
     def __rmul__(cls: _symbol, other: int) -> modulo:
         """
