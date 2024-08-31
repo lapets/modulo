@@ -470,6 +470,7 @@ class modulo(metaclass=_symbol):
             raise TypeError('expecting a congruence class or integer')
 
         other = self._cc(other)
+        # pylint: disable=unbalanced-tuple-unpacking
         (gcd_, inv, _) = egcd(other.residue, self.modulus)
         if gcd_ > 1:
             raise ValueError('congruence class has no inverse')
@@ -543,6 +544,7 @@ class modulo(metaclass=_symbol):
         base = self.residue
 
         if isinstance(other, int) and other < 0:
+            # pylint: disable=unbalanced-tuple-unpacking
             (gcd_, inv, _) = egcd(self.residue, self.modulus)
             if gcd_ > 1:
                 raise ValueError('congruence class has no inverse')

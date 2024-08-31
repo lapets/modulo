@@ -57,6 +57,9 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build']
 
+# Do not qualify class names with module and submodule names.
+add_module_names = False
+
 # Options to configure autodoc extension behavior.
 autodoc_member_order = 'bysource'
 autodoc_default_options = {
@@ -86,7 +89,7 @@ def rtd_url_for_installed_version(name):
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
-    'egcd': (rtd_url_for_installed_version('egcd'), None),
+    'egcd': (rtd_url_for_installed_version('egcd'), None)
 }
 
 
