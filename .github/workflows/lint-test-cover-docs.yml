@@ -1,17 +1,20 @@
 name: lint-test-cover-docs
 on:
-  push
+  push:
+    branches:
+      - '**'
+  workflow_call: # If invoked by build-publish-sign-release workflow.
 jobs:
   lint_test_cover_docs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
-    name: "Python ${{ matrix.python-version }}"
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
+    name: Python ${{ matrix.python-version }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Python.
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -20,11 +23,12 @@ jobs:
           pip install -U .[lint,test]
           python -m pylint modulo # Check against linting rules.
           python -m pytest # Run tests.
+          python src/modulo/modulo.py -v # Run tests via execution.
       - name: Publish coverage results.
         run: |
           pip install -U .[coveralls]
           python -m coveralls --service=github # Submit to coveralls.
-        if: matrix.python-version == '3.11'
+        if: matrix.python-version == '3.12'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
