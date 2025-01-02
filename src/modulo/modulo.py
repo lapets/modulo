@@ -1050,7 +1050,22 @@ class modulo(metaclass=_symbol):
         4
 
         Use of the built-in :obj:`len` function is the recommended approach
-        for retrieving the ``modulus`` attribute of a :obj:`modulo` instance.
+        for retrieving the ``modulus`` attribute of a :obj:`modulo` instance
+        when the modulus is small. However, this will not work when the
+        modulus is ``2 ** 63`` or greater.
+
+        >>> len(mod(2 ** 63 - 1))
+        9223372036854775807
+        >>> len(mod(2 ** 63))
+        Traceback (most recent call last):
+          ...
+        OverflowError: cannot fit 'int' into an index-sized integer
+
+        In such cases, the recommended approach is to leverage the
+        ``modulus`` attribute.
+
+        >>> mod(2 ** 63).modulus
+        9223372036854775808
         """
         return self.modulus
 
